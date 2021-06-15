@@ -1,0 +1,11 @@
+{
+    "deps": {
+    "pacman": [
+        "python-pip"
+    ],
+    "pip": [
+        "progress",
+        "urwid"
+    ]
+}
+}

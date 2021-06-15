@@ -1,0 +1,31 @@
+[
+{
+    "name": "/dev/sda",
+    "part table": "gpt",
+
+    "partitions": [
+        {
+            "part name": "efi",
+            "part number": "1",
+            "hex code" : "ef00",
+            "size": "+512M",
+            "fs": "fat32",
+            "mount point" : "/mnt/efi"
+        },
+
+        {
+            "part name": "root",
+            "part number" : "2",
+            "hex code": "8304",
+            "size": "-",
+            "fs": "btrfs",
+            "mount point": "/mnt",
+            "subvolumes": [
+                "/mnt/root",
+                "/mnt/home",
+                "/mnt/snapshots"
+            ]
+        }
+    ]
+}
+]
