@@ -10,7 +10,8 @@
             "hex code" : "ef00",
             "size": "+512M",
             "fs": "fat32",
-            "mount point" : "/mnt/efi"
+            "mount point" : "/mnt/efi",
+            "mount options": ""
         },
 
         {
@@ -20,10 +21,11 @@
             "size": "-",
             "fs": "btrfs",
             "mount point": "/mnt",
+            "mount options": "noatime,compress=lzo,space_cache=v2",
             "subvolumes": [
-                "/mnt/root",
-                "/mnt/home",
-                "/mnt/snapshots"
+                {"name": "root", "mount point": "/mnt/root"},
+                {"name": "home", "mount point": "/mnt/home"},
+                {"name": "snapshots", "mount point": "/mnt/snapshots"}
             ]
         }
     ]

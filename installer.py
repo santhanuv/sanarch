@@ -96,8 +96,7 @@ if status != 0:
 
 
 #Create Partition
-part_stat, part_msg = classes.PartitionMaker(PART_FILE, DEFAULT).partition()
-print(part_msg)
+part_stat = classes.PartitionMaker(PART_FILE, DEFAULT).partition()
 if part_stat == -1:
     exit(-1)
 elif part_stat != 0:

@@ -5,6 +5,17 @@ import asyncio, subprocess
 import re, json, urwid, sys, time
 
 
+class Command():
+    @staticmethod
+    def mkdir(folders = None):
+        if folders is None:
+            return 1
+        
+        proc = Popen(['mkdir', '-p', folders], stdout=PIPE, stderr=PIPE, text=True)
+        proc.communicate()
+
+        return proc.returncode
+
 class CustomSpinner():
     def __init__(self,prompt, no_of_times, time_in_sec):
         self.t = Thread(target=self.spin, args=(no_of_times, time_in_sec), daemon=True)
@@ -223,7 +234,8 @@ class Formater():
     format_method = {
         'fat32': 'fat',
         'ext4': 'ext4',
-        'btrfs': 'btrfs'
+        'btrfs': 'btrfs',
+        'swap': 'swap'
     }
 
     @classmethod
@@ -245,7 +257,6 @@ class Formater():
                 
 
                 if partition['fs'] in 'btrfs':
-                    print('btrfs')
                     return_code = func(part_id, partition['subvolumes'])
                 else:
                     return_code = func(part_id)
@@ -258,8 +269,8 @@ class Formater():
 
     @staticmethod
     def format_exec(command_list):
-        proc = Popen(command_list, stdout=PIPE, stderr=PIPE, text=True)
-        proc.communicate()[1]
+        proc = Popen(command_list, stdout=PIPE, text=True)
+        proc.communicate()
         return proc.returncode 
 
     @staticmethod
@@ -276,24 +287,116 @@ class Formater():
         if format_stat != 0:
             return format_stat
         
-        proc = Popen(['mount', part_id, '/mnt'], stdout=PIPE, stderr=PIPE, text=True)
+        proc = Popen(['mount', part_id, '/mnt'], stdout=PIPE, text=True)
         proc.communicate()
 
         if proc.returncode != 0:
             return proc.returncode
         
         for subvolume in subvolumes:
-            proc = Popen(['btrfs', 'subvolume', 'create', subvolume], stdout=PIPE,
-            stderr=PIPE, text=True)
+            proc = Popen(['btrfs', 'subvolume', 'create', subvolume['mount point']], stdout=PIPE,
+            text=True)
             proc.communicate()[0]
             if proc.returncode != 0:
                 return proc.returncode
         
-        proc = Popen(['umount', '/mnt'], stdout=PIPE, stderr=PIPE, text=True)
-        proc.communicate()
+        Mounter.umount('/mnt')
 
         return proc.returncode
+
+        @staticmethod
+        def swap(part_id):
+            res = Formater.format_exec(['mkswap', part_id])
+
+            if proc != 0:
+                return res
+
+            return Formater.format_exec(['swapon', part_id])
+
+
+class Mounter():
+    @classmethod
+    def set_msgs(cls, ERR_MOUNT, OK_MOUNT):
+        cls.ERR_MOUNT = ERR_MOUNT
+        cls.OK_MOUNT = OK_MOUNT
+
+
+    @staticmethod
+    def mount(part_id, loc, options=None):
+        if options is not None:
+            proc = Popen(['mount', '-o', options, part_id, loc], 
+            stdout=PIPE, text=True)
+            proc.communicate()
+            return proc.returncode
+        else:
+            proc = Popen(['mount', part_id, loc], stdout=PIPE, text=True)
+            proc.communicate()
+            return proc.returncode
+
+    @staticmethod
+    def btrfs_mount(subvolumes, options, part_id, loc):
+        for subvol in subvolumes:
+            loc = subvol['mount point']
+            Command.mkdir(subvol['mount point'])
+            options += f",subvol={subvol['name']}"
+            if subvol['name'] == 'root' and subvol['mount point'] == '/mnt/root':
+                loc = '/mnt'
+            res = Mounter.mount(part_id, loc, options)
+
+            if res != 0:
+                return
         
+        return 0
+
+    
+    @staticmethod
+    def gen_mount(part_id, loc):
+        Command.mkdir(loc)
+        return Mounter.mount(part_id, loc)
+
+    @staticmethod
+    def mount_parts(part_info):
+        for dev in part_info:
+            part_name = dev['name']
+            for partition in dev['partitions']:
+                if partition['hex code'] == '8200' or partition['name'] == 'swap':
+                    continue
+                part_id = part_name + partition['part number']
+                loc = partition['mount point']
+                options = partition['mount options']
+            
+                if options == '':
+                    options = None
+                
+                if partition['fs'] == 'btrfs':
+                    res = Mounter.btrfs_mount(partition['subvolumes'], options, part_id, loc)
+                else:
+                    res = Mounter.gen_mount(part_id, loc)
+                
+                if res != 0:
+                    return 1
+        
+        return 0
+
+    @staticmethod
+    def umount(part_id, withRec=False):
+        if not withRec:
+            proc = Popen(['umount', part_id], stdout=PIPE, stdin=PIPE, 
+            text=True)
+            proc.communicate()
+        else:
+            proc = Popen(['umount', '-R', part_id], stdout=PIPE, stdin=PIPE, 
+            text=True)
+            proc.communicate()
+
+        return proc.returncode
+
+    @staticmethod
+    def findmnt(part_id):
+        proc = Popen(['findmnt', part_id], stdout=PIPE, stdin=PIPE, text=True)
+        out = proc.communicate()[0]
+
+        return [proc.returncode, out]
 
 
 class PartitionMaker():
@@ -311,6 +414,8 @@ class PartitionMaker():
     OK_FORMAT = '[OK]Disk Formated Successfully.'
     ERR_FORMAT = '[ERR]Disk Format Unsuccessfull.'
     ERR_SUPPORT = '[ERR]Format Type Not Supported.'
+    ERR_MOUNT = '[ERR]Unable to Mount the Partition.'
+    OK_MOUNT = '[OK]Partitions Mounted Successfully.'
 
     def __init__(self, part_filename, default):
         self.part_filename = part_filename
@@ -332,13 +437,15 @@ class PartitionMaker():
         try:
             self.part_file_r = open(self.part_filename, 'r')
         except Exception:
-            return [1, PartitionMaker.ERR_OPEN]
+            print(PartitionMaker.ERR_OPEN)
+            return 1
 
     def close_files(self):
         try:
             self.part_file_r.close()
         except Exception:
-            return [1, PartitionMaker.ERR_CLOSE]
+            print(PartitionMaker.ERR_CLOSE)
+            return 2
     
 
     def get_part_details(self):
@@ -346,12 +453,13 @@ class PartitionMaker():
         out, err = proc.communicate()
 
         if proc.returncode != 0:
-            msg = err + PartitionMaker.ERR_FDISK
-            return [3, msg]
+            print(err + '\n' + PartitionMaker.ERR_FDISK)
+
+            return 3
         
         if 'Permission denied' in out or 'Permission denied' in err:
-            msg = PartitionMaker.ERR_NO_PERMISSION
-            return [4, msg]
+            print(PartitionMaker.ERR_NO_PERMISSION)
+            return 4
         
         dev_list_string = re.split('\n{3}', out, re.MULTILINE)
 
@@ -447,6 +555,7 @@ class PartitionMaker():
         self.open_files()
         cur_devices = self.get_part_details()
         self.part_info = self.read_part_info()
+        self.close_files()
         
         if not self.default:
             confirm = self.print_on_wid(cur_devices, self.part_info)
@@ -454,28 +563,50 @@ class PartitionMaker():
             confirm = True
         
         if confirm == False:
-            msg = f'Edit the {self.part_filename} file and continue.'
-            return [-1, msg]
+            print(f'Edit the {self.part_filename} file and continue.')
+            return -1
         elif confirm == None:
-            return [5, PartitionMaker.ERR_CONFIRM]
+            print(PartitionMaker.ERR_CONFIRM)
+            return 5
         else:
             print(PartitionMaker.WARN_PARTITION)
+        
+        # Unmount all Disks if mounted
+        if Mounter.findmnt('/mnt')[0] == 0:
+            Mounter.umount('/mnt', withRec=True)
+        for dev in self.part_info:
+            for part in dev['partitions']:
+                part_id = dev['name'] + part['part number']
+                if Mounter.findmnt(part_id)[0] == 0:
+                    Mounter.umount(part_id)
         
         partition_status = asyncio.run(Partitioner.create_partition(self.part_info))
 
         if partition_status == PartitionMaker.ERR_MBR:
-            return [6, PartitionMaker.ERR_MBR]
+            print(PartitionMaker.ERR_MBR)
+            return 6
         elif partition_status == PartitionMaker.ERR_PARTITION:
-            return [7, PartitionMaker.ERR_PARTITION]
+            print(PartitionMaker.ERR_PARTITION)
+            return 7
         elif partition_status == PartitionMaker.OK_PART:
             self.success_status = PartitionMaker.OK_PART
             print(PartitionMaker.OK_PART)
 
         rcode, msg = Formater().format(self.part_info)
-
-        self.close_files()
-        return [rcode, msg]
         
+        if rcode != 0:
+            print(msg)
+            return 8
+        print(msg)
 
+        Mounter.set_msgs(PartitionMaker.ERR_MOUNT, PartitionMaker.OK_MOUNT)
+        mnt_res = Mounter.mount_parts(self.part_info)
+
+        if mnt_res != 0:
+            print(PartitionMaker.ERR_MBR)
+            return 9
+
+        print(PartitionMaker.OK_MOUNT)
+        return 0
 
 

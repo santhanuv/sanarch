@@ -1,0 +1,12 @@
+{
+    "pacstrap": {
+        "loc": "/mnt",
+        "packs": [
+            "base",
+            "linux",
+            "linux-firmware",
+            "amd-ucode",
+            "vim"
+        ]
+    }
+}
