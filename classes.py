@@ -3,18 +3,245 @@ from progress.spinner import Spinner
 from threading import Thread
 import asyncio, subprocess
 import re, json, urwid, sys, time
+import concurrent.futures
+
+
+class ArchInstaller():
+    PART_FILE = None
+    CONFIG_FILE = None
+    DEFAULT = False
+    PART_INFO = []
+    CONFIG_INFO = {}
+    IS_BTRFS = True
+
+    @staticmethod
+    def set_files(part_file, config_file):
+        ArchInstaller.PART_FILE = part_file
+        ArchInstaller.CONFIG_FILE = config_file
+        ArchInstaller.set_part_info()
+        ArchInstaller.set_config_info()
+
+    @staticmethod
+    def set_default(defalut):
+        ArchInstaller.DEFAULT = defalut
+
+    @staticmethod
+    def set_part_info():
+        with open(ArchInstaller.PART_FILE) as f:
+            data = f.read()
+            ArchInstaller.PART_INFO = json.loads(data)
+
+    @staticmethod
+    def set_config_info():
+        with open(ArchInstaller.CONFIG_FILE) as f:
+            data = f.read()
+            ArchInstaller.CONFIG_INFO = json.loads(data)
+
+    @staticmethod
+    def get_part_info():
+        return ArchInstaller.PART_INFO
+
+    @staticmethod
+    def get_config_info():
+        return ArchInstaller.CONFIG_INFO
+
+    @staticmethod
+    def get_default():
+        return ArchInstaller.DEFAULT
+
+    @staticmethod
+    def set_is_btrfs(val):
+        ArchInstaller.IS_BTRFS = val
+
+    @staticmethod
+    def get_is_btrfs():
+        return ArchInstaller.IS_BTRFS
+
+
+class CommandExecutor():
+    @staticmethod
+    def execute(command, stdout=None, stderr=None,stdin=None, input= None):
+        proc = Popen(command, stdout=stdout, stderr=stderr,stdin=stdin, text=True)
+        
+        out, err = proc.communicate(input)
+
+        return (proc.returncode, out, err)
 
 
 class Command():
+    chroot = 'arch-chroot' 
+    chroot_loc = '/mnt'
+
     @staticmethod
     def mkdir(folders = None):
         if folders is None:
             return 1
-        
+
         proc = Popen(['mkdir', '-p', folders], stdout=PIPE, stderr=PIPE, text=True)
+        proc.communicate()
+        return proc.returncode
+
+    @staticmethod
+    def pacstrap():
+        pacs = ArchInstaller.get_config_info()['pacstrap']
+        
+        if pacs is None:
+            return 0
+        
+        pac_command = 'base '
+        for pac in pacs:
+            pac_command += pac + ' '
+        
+        command = 'pacstrap /mnt ' + pac_command
+
+        proc = Popen(command, stdin=PIPE, text=True, shell=True)
+        proc.communicate('y\n')
+
+        return 0
+
+    @staticmethod
+    def pacman():
+        pacs = ArchInstaller.get_config_info()['pacman']
+
+        if pacs is None:
+            return
+            
+        pac_command = ''
+        for pac in pacs:
+            pac_command += pac + ' '
+        
+        command = f'{Command.chroot} {Command.chroot_loc} pacman -S --noconfirm ' + pac_command
+        proc = Popen(command,text=True, shell=True)
+        proc.communicate()
+        
+        #Raise Exception
+        if proc.returncode != 0:
+            exit(13)
+        
+        return 0
+
+    @staticmethod
+    def set_mirrorlist():
+        proc = Popen(['pacman','--noconfirm','-S','reflector'],stdout=PIPE, stderr=PIPE)
+        proc.communicate()
+        if proc.returncode != 0:
+            return (proc.returncode, '[ERR]Unable to install Reflector')
+        
+        proc = Popen(['reflector','--latest', '10', '--sort', 
+            'rate', '--save', '/etc/pacman.d/mirrorlist'], stderr=PIPE)
+        err = proc.communicate()[1]
+        
+        if proc.returncode == 0:
+            return (proc.returncode, '[OK]Mirror List set')
+        else:
+            return (proc.returncode, err)
+
+    @staticmethod
+    def genfstab(uuid=True):
+        if uuid:
+            proc = Popen('genfstab -U /mnt >> /mnt/etc/fstab', stdout=PIPE, stderr=PIPE,text=True, shell=True)
+        else:
+            proc = Popen('genfstab mnt >> /mnt/etc/fstab', stdout=PIPE, stderr=PIPE,text=True, shell=True)
+
+        out = proc.communicate()[0]
+        
+        print(out)
+        return proc.returncode
+
+    @staticmethod
+    def arch_config():
+        config = ArchInstaller.get_config_info()['settings']
+
+        zone = '/usr/share/zoneinfo/' + config['zone']
+        proc = Popen([Command.chroot,Command.chroot_loc, 'ln', '-sf', zone, '/etc/localtime'],
+        text= True)
+        proc.communicate()
+
+        if proc.returncode != 0:
+            return 1
+        
+        proc = Popen([Command.chroot, Command.chroot_loc, 'hwclock', '--systohc'], text=True)
+        proc.communicate()
+
+        if proc.returncode != 0:
+            return 2
+
+        with open('/mnt/etc/locale.gen', 'a') as f:
+            for locale in config['locale']:
+                f.write(locale + '\n')
+
+        proc = Popen([Command.chroot, Command.chroot_loc, 'locale-gen'], text=True)
+        proc.communicate()
+
+        if proc.returncode != 0:
+            return 3
+
+        with open('/mnt/etc/locale.conf', 'w') as f:
+            lang = config['lang']
+            f.write(f'LANG={lang}\n')
+
+        if config['keymap'] != '' or not None:
+            with open('/mnt/etc/vconsole.conf', 'w') as f:
+                keymap = config['keymap']
+                f.write(f'KEYMAP={keymap}\n')
+
+        hostname = config['hostname']
+        with open('/mnt/etc/hostname', 'w') as f:
+            f.write(hostname)
+            f.write('\n')
+
+        with open('/mnt/etc/hosts', 'w') as f:
+            f.write(f'\n127.0.0.1\tlocalhost\n::1\tlocalhost\n127.0.1.1\t{hostname}.localdomain\t {hostname}')
+            f.write('\n')
+
+        tmp_pass = config['tmp rt pass']
+        proc = Popen([Command.chroot, Command.chroot_loc, 'passwd', 'root'], stdin=PIPE,text=True)
+        proc.communicate(f'{tmp_pass}\n{tmp_pass}\n')
+
+        if ArchInstaller.get_is_btrfs():
+            with open('/mnt/etc/mkinitcpio.conf', 'r') as fr:
+                with open('/mnt/etc/mkinitcpio.conf.bak', 'w') as fw:
+                    for line in fr:
+                        if not line.startswith('#'):
+                            if line.find('MODULES') != -1:
+                                modules = line[line.find('(')+1:line.find(')')].strip()
+                                
+                                if modules != '':
+                                    new_modules = f'MODULES=({modules} btrfs)'
+                                else:
+                                    new_modules = f'MODULES=(btrfs)'
+                                
+                                fw.write(new_modules + '\n')
+                                continue
+                        fw.write(line)
+
+            proc = Popen(['mv', '/mnt/etc/mkinitcpio.conf.bak', '/mnt/etc/mkinitcpio.conf'], 
+            text=True)
+            proc.communicate()
+
+            proc = Popen([Command.chroot, Command.chroot_loc, 'mkinitcpio', '-p', 'linux'],
+            text=True)
+            proc.communicate()
+
+        if proc.returncode != 0:
+            return proc.returncode
+                
+
+class BootLoader():
+    @staticmethod
+    def inst_grub():
+        chroot = Command.chroot
+        chroot_loc = Command.chroot_loc
+        proc = Popen(
+            f'{chroot} {chroot_loc} grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=GRUB', shell=True, text=True)
+        proc.communicate()
+
+        proc = Popen(f'{chroot} {chroot_loc} grub-mkconfig -o /boot/grub/grub.cfg', shell=True,
+        text=True)
         proc.communicate()
 
         return proc.returncode
+
 
 class CustomSpinner():
     def __init__(self,prompt, no_of_times, time_in_sec):
@@ -257,7 +484,8 @@ class Formater():
                 
 
                 if partition['fs'] in 'btrfs':
-                    return_code = func(part_id, partition['subvolumes'])
+                    ArchInstaller.set_is_btrfs(True)
+                    return_code = func(part_id, partition['subvolumes'], partition['mount point'])
                 else:
                     return_code = func(part_id)
 
@@ -282,36 +510,41 @@ class Formater():
         return Formater.format_exec(['mkfs.ext4', part_id])
     
     @staticmethod
-    def btrfs(part_id, subvolumes):
+    def btrfs(part_id, subvolumes, mnt):
         format_stat = Formater.format_exec(['mkfs.btrfs', '-f', part_id])
         if format_stat != 0:
             return format_stat
         
-        proc = Popen(['mount', part_id, '/mnt'], stdout=PIPE, text=True)
+        proc = Popen(['mount', part_id, mnt], stdout=PIPE, text=True)
         proc.communicate()
 
         if proc.returncode != 0:
             return proc.returncode
         
         for subvolume in subvolumes:
-            proc = Popen(['btrfs', 'subvolume', 'create', subvolume['mount point']], stdout=PIPE,
+            if mnt.endswith('/'):
+                sub_name = mnt + subvolume['name']
+            else:
+                sub_name = mnt + '/' + subvolume['name']
+
+            proc = Popen(['btrfs', 'subvolume', 'create', sub_name], stdout=PIPE,
             text=True)
             proc.communicate()[0]
             if proc.returncode != 0:
                 return proc.returncode
         
-        Mounter.umount('/mnt')
+        Mounter.umount(mnt)
 
         return proc.returncode
 
-        @staticmethod
-        def swap(part_id):
-            res = Formater.format_exec(['mkswap', part_id])
+    @staticmethod
+    def swap(part_id):
+        res = Formater.format_exec(['mkswap', part_id])
 
-            if proc != 0:
-                return res
+        if res != 0:
+            return res
 
-            return Formater.format_exec(['swapon', part_id])
+        return Formater.format_exec(['swapon', part_id])
 
 
 class Mounter():
@@ -335,12 +568,14 @@ class Mounter():
 
     @staticmethod
     def btrfs_mount(subvolumes, options, part_id, loc):
+        if subvolumes is None:
+            return 2
+        
         for subvol in subvolumes:
             loc = subvol['mount point']
-            Command.mkdir(subvol['mount point'])
+            Command.mkdir(loc)
             options += f",subvol={subvol['name']}"
-            if subvol['name'] == 'root' and subvol['mount point'] == '/mnt/root':
-                loc = '/mnt'
+
             res = Mounter.mount(part_id, loc, options)
 
             if res != 0:
@@ -356,26 +591,58 @@ class Mounter():
 
     @staticmethod
     def mount_parts(part_info):
+        mounted = []
+        unmount_parts = []
         for dev in part_info:
             part_name = dev['name']
             for partition in dev['partitions']:
-                if partition['hex code'] == '8200' or partition['name'] == 'swap':
+                if partition['hex code'] == '8200' or partition['part name'] == 'swap':
                     continue
                 part_id = part_name + partition['part number']
                 loc = partition['mount point']
                 options = partition['mount options']
-            
+                fs_type = partition['fs']
+
+                if fs_type == 'btrfs':
+                    subvolumes = partition['subvolumes']
+                else:
+                    subvolumes = None
+
+                if partition['part name'] != 'root' and 'root' not in mounted:
+                    unmount_parts.append(
+                        {
+                            "part_id": part_id,
+                            "loc": loc,
+                            "options": options,
+                            "fs_type": fs_type,
+                            "subvolumes": subvolumes
+                        }
+                    )
+                    continue
+
+
                 if options == '':
                     options = None
                 
-                if partition['fs'] == 'btrfs':
-                    res = Mounter.btrfs_mount(partition['subvolumes'], options, part_id, loc)
+                if fs_type == 'btrfs':
+                    res = Mounter.btrfs_mount(subvolumes, options, part_id, loc)
                 else:
                     res = Mounter.gen_mount(part_id, loc)
                 
                 if res != 0:
                     return 1
         
+        for unmount_part in unmount_parts:
+            if unmount_part['fs_type'] == 'btrfs':
+                res = Mounter.btrfs_mount(unmount_part['subvolumes'], 
+                unmount_part['options'], unmount_part['part_id'], 
+                unmount_part['loc'])
+            else:
+                res = Mounter.gen_mount(unmount_part['part_id'], unmount_part['loc'])
+                
+            if res != 0:
+                return 1
+
         return 0
 
     @staticmethod
@@ -417,10 +684,9 @@ class PartitionMaker():
     ERR_MOUNT = '[ERR]Unable to Mount the Partition.'
     OK_MOUNT = '[OK]Partitions Mounted Successfully.'
 
-    def __init__(self, part_filename, default):
-        self.part_filename = part_filename
-        self.part_info = None
-        self.default = default
+    def __init__(self):
+        self.part_info = ArchInstaller.get_part_info()
+        self.default = ArchInstaller.get_default()
         Partitioner.set_msg(
             ERR_PARTITION=PartitionMaker.ERR_PARTITION, 
             ERR_MBR=PartitionMaker.ERR_MBR,
@@ -432,20 +698,6 @@ class PartitionMaker():
             PartitionMaker.ERR_FORMAT,
             PartitionMaker.ERR_SUPPORT
             )
-
-    def open_files(self):
-        try:
-            self.part_file_r = open(self.part_filename, 'r')
-        except Exception:
-            print(PartitionMaker.ERR_OPEN)
-            return 1
-
-    def close_files(self):
-        try:
-            self.part_file_r.close()
-        except Exception:
-            print(PartitionMaker.ERR_CLOSE)
-            return 2
     
 
     def get_part_details(self):
@@ -491,11 +743,6 @@ class PartitionMaker():
 
         return devices
 
-
-    def read_part_info(self):
-        data = self.part_file_r.read()
-        part_info = json.loads(data)
-        return part_info
     
     def tostr_part_device(self, devices):
         part_dev_str = ''
@@ -552,10 +799,7 @@ class PartitionMaker():
 
 
     def partition(self):
-        self.open_files()
         cur_devices = self.get_part_details()
-        self.part_info = self.read_part_info()
-        self.close_files()
         
         if not self.default:
             confirm = self.print_on_wid(cur_devices, self.part_info)
@@ -563,7 +807,8 @@ class PartitionMaker():
             confirm = True
         
         if confirm == False:
-            print(f'Edit the {self.part_filename} file and continue.')
+            part_file = ArchInstaller.PART_FILE
+            print(f'Edit the {part_file} file and continue.')
             return -1
         elif confirm == None:
             print(PartitionMaker.ERR_CONFIRM)

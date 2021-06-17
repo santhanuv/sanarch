@@ -1,0 +1,11 @@
+base started
+base finished
+linux-firmware is started
+linux-firmware has error
+linux is started
+linux has error
+amd-ucode is started
+amd-ucode has error
+vim is started
+pacstrap /mnt linux-firmware has error
+pacstrap /mnt linux-firmware has error

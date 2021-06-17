@@ -10,10 +10,17 @@
             "hex code" : "ef00",
             "size": "+512M",
             "fs": "fat32",
-            "mount point" : "/mnt/efi",
+            "mount point" : "/mnt/boot/efi",
             "mount options": ""
         },
-
+        {
+            "part name": "efi",
+            "part number": "3",
+            "hex code": "8200",
+            "size": "+1G",
+            "fs": "swap",
+            "mount options": ""
+        },
         {
             "part name": "root",
             "part number" : "2",
@@ -23,9 +30,9 @@
             "mount point": "/mnt",
             "mount options": "noatime,compress=lzo,space_cache=v2",
             "subvolumes": [
-                {"name": "root", "mount point": "/mnt/root"},
-                {"name": "home", "mount point": "/mnt/home"},
-                {"name": "snapshots", "mount point": "/mnt/snapshots"}
+                {"name": "@", "mount point": "/mnt"},
+                {"name": "@home", "mount point": "/mnt/home"},
+                {"name": "@snapshots", "mount point": "/mnt/.snapshots"}
             ]
         }
     ]
