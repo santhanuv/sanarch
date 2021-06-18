@@ -22,6 +22,7 @@ class ArchInstaller():
     IS_BTRFS = True
     que = None
     run_state = False
+    internet_state = False
 
     @staticmethod
     def set_run_state(val):
@@ -133,6 +134,25 @@ class ArchInstaller():
         """
 
         return ArchInstaller.IS_BTRFS
+
+    @staticmethod
+    def set_internet_state(val):
+
+        """
+            Setting this to True tell other classes and functions that the internet 
+            connection is ok.
+        """
+
+        ArchInstaller.internet_state = val
+    
+    @staticmethod
+    def get_internet_state():
+
+        """
+            Returns the current internet status that has set by the Ping class.
+        """
+
+        return ArchInstaller.internet_state
 
 
 class Command():
@@ -639,7 +659,8 @@ class Ping():
         if not status:
             raise Exception('[ ERR ] Check your Internet Connection.', 1)
 
-
+        
+        ArchInstaller.set_internet_state(True)
 
 
 class SysClockUpdator():

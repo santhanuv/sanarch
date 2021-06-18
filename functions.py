@@ -72,6 +72,8 @@ def dequeue(p1, p2):
             sys.stdout.flush()
         except:
             pass
+        finally:
+            time.sleep(1)
 
 def ping():
 
@@ -87,14 +89,27 @@ def ping():
         print([pingException.msg])
         sys.exit(1)
 
+
+def partition():
+
+    """
+        Partitions the Disk.
+    """
+
+    try:
+        classes.Command.verify_efi_boot()
+        classes.SysClockUpdator().update_sys_clock()
+        classes.PartitionMaker().partition()
+    except classes.ArchException as e:
+        print(e.msg)
+        sys.exit(e.return_code)
+
+
 def install():
     """
         Install the Arch os to the system.
     """
     try:
-        classes.Command.verify_efi_boot()
-        classes.SysClockUpdator().update_sys_clock()
-        classes.PartitionMaker().partition()
         classes.Command.pacstrap()
         classes.Command.pacman()
         classes.Command.genfstab(uuid=True)
