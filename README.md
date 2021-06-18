@@ -1,4 +1,4 @@
-# arch-installer
+# Arch-Installer
 
 An automated Arch Linux installer.
 The partition information needed to partition the Disk should be specified in a file in JSON format.
@@ -12,6 +12,6 @@ The partition information needed to partition the Disk should be specified in a 
 3. FAT32
 4. swap
 
- # Future Plans
- 1. Change the configuration file to TOML or YAML.
- 2. Add more file system support.
+# Future Plans
+1. Change the configuration file to TOML or YAML.
+2. Add more file system support.
