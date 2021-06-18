@@ -449,8 +449,6 @@ class Command():
             with open(f'{loc}/etc/sudoers.temp', 'w') as fw:
                 for line in fr:
                     if line.find('# %wheel ALL=(ALL) ALL') != -1:
-                        print('this')
-                        print(line)
                         newline = line.replace('# ', '')
                         fw.write(newline)
                     else:
