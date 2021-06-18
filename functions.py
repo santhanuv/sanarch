@@ -109,9 +109,10 @@ def install():
         classes.Command.user_add()
         classes.Mounter.umount(None, umall=True)
     
-    except classes.ArchException as efi_exception:
-        print(efi_exception.msg)
-        sys.exit(2)
+    except classes.ArchException as e:
+        print(e.msg)
+        classes.ArchInstaller.set_run_state(False)
+        sys.exit(e.return_code)
     finally:
         classes.ArchInstaller.set_run_state(False)
 

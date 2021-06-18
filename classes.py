@@ -411,6 +411,7 @@ class Command():
             groups = settings['user groups']
             if name is None or name == '':
                 name = input('Enter user Name: ')
+                groups = input('Enter the groups: ')
         
         command = f'{chroot} {loc} useradd -mG {groups} {name}'
         proc = Popen(command, shell=True, text=True)
