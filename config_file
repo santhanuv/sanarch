@@ -35,6 +35,7 @@
         "lang": "en_US.UTF-8",
         "keymap": "",
         "hostname": "SanArch",
-        "tmp rt pass": "pass"
+        "user name": "San",
+        "user groups": "wheel"
     }
 }
