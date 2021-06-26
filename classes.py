@@ -617,7 +617,8 @@ class CSpinner():
             if self.state:
                 time.sleep(self.delay_time)
             else:
-                return
+                break
+        return
         
 
 class Ping():
