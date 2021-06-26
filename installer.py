@@ -24,9 +24,10 @@ t_install = Thread(target=functions.install, daemon=True)
 t2 = Thread(target=functions.dequeue, args=(t1, p1),daemon=True)
 
 # Starting the process and threads
+t2.start()
 t1.start()
 p1.start()
-t2.start()
+
 
 # Wating for the threads to finish
 t1.join()
