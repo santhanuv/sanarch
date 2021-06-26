@@ -221,8 +221,8 @@ class Command():
         proc = Popen(command, stdout=PIPE, stderr=PIPE, stdin=PIPE, text=True, shell=True)
         proc.communicate('y\n')
 
-        ArchInstaller.que.put_nowait('Done packstrap...')
         spinner.stop()
+        ArchInstaller.que.put_nowait('Done packstrap...')
         return 0
 
     @staticmethod
