@@ -16,6 +16,7 @@ functions.intialize_install(PART_FILE, CONF_FILE, DEFAULT)
 # process to install the arch system.
 t1 = Thread(target=functions.ping, daemon=True)
 p1 = Process(target=functions.partition, daemon=True)
+t_install = Thread(target=functions.install, daemon=True)
 
 # Thread to print the messages that the threads and the process wants to output.
 # A Queue from the multiprocessing module is used to pass the information. This queue is both thread
@@ -31,7 +32,9 @@ t2.start()
 t1.join()
 p1.join()
 
-functions.install()
+t_install.start()
+t_install.join()
+
 t2.join()
 
 print('Installation Completed Successfully. Please Reboot :)')
