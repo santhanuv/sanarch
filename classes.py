@@ -308,7 +308,7 @@ class Command():
             Configures the Arch system.
         """
 
-        print('configuring')
+        ArchInstaller.que.put_nowait('configuring')
         config = ArchInstaller.get_config_info()['settings']
 
         zone = '/usr/share/zoneinfo/' + config['zone']
@@ -1315,7 +1315,7 @@ class PartitionMaker():
         #+ 'USING THE PARTITIONS: \n' \
         #+ self.tostr_part_info(part_info)
 
-        que = 'Do YOU WANT TO CONTINUE WITH THIS CONFIGURATION ?(y/n)'
+        question = 'Do YOU WANT TO CONTINUE WITH THIS CONFIGURATION ?(y/n)'
 
         sys.stdout.write("\x1b[2J\x1b[H")
         
@@ -1354,7 +1354,7 @@ class PartitionMaker():
                         sub_mnt = subvol['mount point']
                         print(f'\t\t{sub_name}\t\t{sub_mnt}')
         
-        confirmation = input(que)
+        confirmation = input(question)
         if confirmation in ('y', 'Y'):
             return True
         else:
