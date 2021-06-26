@@ -204,12 +204,13 @@ class Command():
             Uses the arch pacstrap to install the base and other packages.
         """
 
-        spinner = CSpinner('Installing Essential Packages ',delay_time=0.1)
-        spinner.start()
+        #spinner = CSpinner('Installing Essential Packages ',delay_time=0.1)
+        #spinner.start()
+        ArchInstaller.que.put_nowait('Installing Essential Packages...')
         pacs = ArchInstaller.get_config_info()['pacstrap']
         
         if pacs is None:
-            spinner.stop()
+            #spinner.stop()
             return 0
         
         pac_command = 'base '
@@ -221,7 +222,7 @@ class Command():
         proc = Popen(command, stdout=PIPE, stderr=PIPE, stdin=PIPE, text=True, shell=True)
         proc.communicate('y\n')
 
-        spinner.stop()
+        #spinner.stop()
         ArchInstaller.que.put_nowait('Done packstrap...')
         return 0
 
@@ -233,11 +234,12 @@ class Command():
         """
 
         pacs = ArchInstaller.get_config_info()['pacman']
-        spinner = CSpinner('Installing Packages ',delay_time=0.1)
-        spinner.start()
+        #spinner = CSpinner('Installing Packages ',delay_time=0.1)
+        #spinner.start()
+        ArchInstaller.que.put_nowait('Installing Packages...')
 
         if pacs is None:
-            spinner.stop()
+            #spinner.stop()
             return
             
         pac_command = ''
@@ -250,10 +252,10 @@ class Command():
         
         #Raise Exception
         if proc.returncode != 0:
-            spinner.stop()
+            #spinner.stop()
             raise ArchException('Unable to install Packages Using pacman', 1)
         
-        spinner.stop()
+        #spinner.stop()
         ArchInstaller.que.put_nowait('Done Installing packages...')
         return 0
 
