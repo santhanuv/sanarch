@@ -72,8 +72,6 @@ def dequeue(p1, p2):
             sys.stdout.flush()
         except:
             pass
-        finally:
-            time.sleep(1)
 
 def ping():
 
