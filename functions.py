@@ -123,6 +123,7 @@ def install():
         classes.Command.passwd('root')
         classes.Command.user_add()
         classes.Mounter.umount(None, umall=True)
+        classes.ArchInstaller.set_run_state(False)
     
     except classes.ArchException as e:
         print(e.msg)
