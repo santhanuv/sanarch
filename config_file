@@ -37,5 +37,8 @@
         "hostname": "SanArch",
         "user name": "san",
         "user groups": "wheel"
-    }
+    },
+    "services": [
+        "NetworkManager"
+    ]
 }
