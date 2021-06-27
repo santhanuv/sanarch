@@ -38,4 +38,3 @@ t_install.join()
 
 t2.join()
 
-print('Installation Completed Successfully. Please Reboot :)')

@@ -204,7 +204,7 @@ class Command():
             Uses the arch pacstrap to install the base and other packages.
         """
 
-        spinner = CSpinner('Installing Essential Packages ',delay_time=0.1)
+        spinner = CSpinner('Installing Essential Packages ',delay_time=0.5)
         spinner.start()
         #ArchInstaller.que.put_nowait('Installing Essential Packages...')
         pacs = ArchInstaller.get_config_info()['pacstrap']
@@ -223,7 +223,7 @@ class Command():
         proc.communicate('y\n')
 
         spinner.stop()
-        ArchInstaller.que.put_nowait('Done packstrap...')
+        ArchInstaller.que.put_nowait('Done packstrap...\n')
         return 0
 
     @staticmethod
@@ -234,7 +234,7 @@ class Command():
         """
 
         pacs = ArchInstaller.get_config_info()['pacman']
-        spinner = CSpinner('Installing Packages ',delay_time=0.1)
+        spinner = CSpinner('Installing Packages ',delay_time=0.5)
         spinner.start()
         #ArchInstaller.que.put_nowait('Installing Packages...')
 
@@ -256,7 +256,7 @@ class Command():
             raise ArchException('Unable to install Packages Using pacman', 1)
         
         spinner.stop()
-        ArchInstaller.que.put_nowait('Done Installing packages...')
+        ArchInstaller.que.put_nowait('Done Installing packages...\n')
         return 0
 
     @staticmethod

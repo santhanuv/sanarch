@@ -121,11 +121,10 @@ def install():
         classes.Command.passwd('root')
         classes.Command.user_add()
         classes.Mounter.umount(None, umall=True)
-        classes.ArchInstaller.set_run_state(False)
+        print('Installation Completed Successfully. Please Reboot :)')
     
     except classes.ArchException as e:
         print(e.msg)
-        classes.ArchInstaller.set_run_state(False)
         sys.exit(e.return_code)
     finally:
         classes.ArchInstaller.set_run_state(False)
