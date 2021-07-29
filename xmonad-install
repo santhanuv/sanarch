@@ -1,0 +1,74 @@
+#!/bin/bash
+
+if [ "$EUID" -ne 0 ]
+then
+    echo "Run the script as root"
+    exit
+fi
+
+echo "Updating System..."
+
+pacman --noconfirm -Syu
+pacman --noconfirm --needed git base-devel
+
+if pacman -Q | grep -i paru $> /dev/null;
+then
+    helper="paru"
+elif pacman -Q | grep -i yay $> /dev/null;
+then
+    helper="yay"
+else
+    mkdir -p setWM/paru-aur
+    git clone https://aur.archlinux.org/paru.git ./setWM/paru-aur
+    cd ./setWM/paru-aur
+    makepkg -si
+    cd ../
+    helper="paru"
+fi
+
+$helper --needed -S ttf-iosevka\
+                 ttf-iosevka-term\
+                 ttf-material-design-icons\
+                 nerd-fonts-mononoki\
+                 ttf-font-awesome\
+                 nodejs-material-design-icons\
+                 alacritty\
+                 xmonad\
+                 xmonad-contrib\
+                 xorg-xsetroot\
+                 polybar-git\
+                 dmenu
+
+mkdir tmp-clone
+mkdir bak
+git clone git@github.com:santhanuv17/dotfiles.git ./tmp-clone
+
+fontSrc="./tmp-clone/dotfiles/fonts"
+fontDist="/usr/local/share/fonts/ttf"
+
+mkdir -p "$fontDist/RadioUnchecked"
+cp "$fontSrc/RadioUnchecked/fonts/RadioUnchecked.ttf" "$fontDist/RadioUnchecked"
+
+mkdir -p "$fontDist/VolumeIcons"
+cp "$fontSrc/VolumeIcons/fonts/VolumeIcons.ttf" "$fontDist/VolumeIcons"
+
+fc-cache
+
+if [ -d .config/alacritty ]
+then
+    mv .config/alacritty bak/alacritty-bak
+fi
+cp ./tmp-clone/dotfiles/terminals/alacritty .config/
+
+if [ -d .config/polybar ]
+then
+    mv .config/polybar bak/polybar-bak
+fi
+cp ./tmp-clone/dotfiles/bars/polybar-xmonad .config/polybar
+
+if [ -d ~/.xmonad ]
+then
+    mv ~/.xmonad bak/xmonad-bak
+fi
+mkdir -p ~/.xmonad
+cp ./tmp-clone/dotfiles/wm/xmonad/xmonad.hs ~/.xmonad/xmonad.hs
