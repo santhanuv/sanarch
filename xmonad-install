@@ -72,3 +72,5 @@ then
 fi
 mkdir -p ~/.xmonad
 cp ./tmp-clone/dotfiles/wm/xmonad/xmonad.hs ~/.xmonad/xmonad.hs
+
+echo "exec xmonad" >> $HOME/.xinitrc
