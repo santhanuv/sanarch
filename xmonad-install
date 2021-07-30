@@ -1,20 +1,38 @@
 #!/bin/bash
 
-if [ "$EUID" -ne 0 ]
-then
-    echo "Run the script as root"
-    exit
-fi
-
 echo "Updating System..."
 
-pacman --noconfirm -Syu
-pacman --noconfirm --needed git base-devel
+sudo pacman --noconfirm -Syu
+sudo pacman --noconfirm --needed -S git base-devel xorg-xinit xorg-server xorg-xsetroot
 
-if pacman -Q | grep -i paru $> /dev/null;
+echo "1. nvidia\t2. xf86-video-amdgpu\t3. xf86-video-intel"
+read -r -p "Choose the driver(Default 1): " inp
+
+case $inp in
+	[1])
+		vd='nvidia nvidia-utils'
+		;;
+	[2])
+		vd='xf86-video-amdgpu'
+		;;
+	[3])
+		vd='xf86-video-intel'
+		;;
+	[4])
+		vd=""
+		;;
+	[*])
+		vd='nvidia nvidia-utils'
+		;;
+esac
+
+sudo pacman --needed -S $vd
+
+
+if pacman -Q | grep -i paru &> /dev/null
 then
     helper="paru"
-elif pacman -Q | grep -i yay $> /dev/null;
+elif pacman -Q | grep -i yay &> /dev/null
 then
     helper="yay"
 else
@@ -26,7 +44,7 @@ else
     helper="paru"
 fi
 
-$helper --needed -S ttf-iosevka\
+$helper --needed --noconfirm -S ttf-iosevka\
                  ttf-iosevka-term\
                  ttf-material-design-icons\
                  nerd-fonts-mononoki\
@@ -41,16 +59,16 @@ $helper --needed -S ttf-iosevka\
 
 mkdir tmp-clone
 mkdir bak
-git clone git@github.com:santhanuv17/dotfiles.git ./tmp-clone
+git clone https://github.com/santhanuv17/dotfiles.git ./tmp-clone
 
-fontSrc="./tmp-clone/dotfiles/fonts"
+fontSrc="./tmp-clone/fonts"
 fontDist="/usr/local/share/fonts/ttf"
 
-mkdir -p "$fontDist/RadioUnchecked"
-cp "$fontSrc/RadioUnchecked/fonts/RadioUnchecked.ttf" "$fontDist/RadioUnchecked"
+sudo mkdir -p "$fontDist/RadioUnchecked"
+sudo cp "$fontSrc/RadioUnchecked/fonts/RadioUnchecked.ttf" "$fontDist/RadioUnchecked"
 
-mkdir -p "$fontDist/VolumeIcons"
-cp "$fontSrc/VolumeIcons/fonts/VolumeIcons.ttf" "$fontDist/VolumeIcons"
+sudo mkdir -p "$fontDist/VolumeIcons"
+sudo cp "$fontSrc/VolumeIcons/fonts/VolumeIcons.ttf" "$fontDist/VolumeIcons"
 
 fc-cache
 
@@ -58,19 +76,19 @@ if [ -d .config/alacritty ]
 then
     mv .config/alacritty bak/alacritty-bak
 fi
-cp ./tmp-clone/dotfiles/terminals/alacritty .config/
+cp -r ./tmp-clone/terminals/alacritty $HOME/.config/
 
 if [ -d .config/polybar ]
 then
     mv .config/polybar bak/polybar-bak
 fi
-cp ./tmp-clone/dotfiles/bars/polybar-xmonad .config/polybar
+cp -r ./tmp-clone/bars/polybar-xmonad $HOME/.config/polybar
 
 if [ -d ~/.xmonad ]
 then
     mv ~/.xmonad bak/xmonad-bak
 fi
 mkdir -p ~/.xmonad
-cp ./tmp-clone/dotfiles/wm/xmonad/xmonad.hs ~/.xmonad/xmonad.hs
+cp ./tmp-clone/wm/xmonad/xmonad.hs $HOME/.xmonad/xmonad.hs
 
 echo "exec xmonad" >> $HOME/.xinitrc
