@@ -119,7 +119,6 @@ def install():
         classes.BootLoader.inst_grub()
 
         classes.Command.enable_services()
-        classes.Mounter.umount(None, umall=True)
         print('Installation Completed Successfully. Please Reboot :)')
     
     except classes.ArchException as e:
@@ -143,3 +142,4 @@ def finalize_install():
         print(e.msg)
     finally:
         classes.ArchInstaller.set_run_state(False)
+        classes.Mounter.umount(None, umall=True)
