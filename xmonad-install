@@ -55,6 +55,7 @@ $helper --needed --noconfirm -S ttf-iosevka\
                  xmonad-contrib\
                  xorg-xsetroot\
                  polybar-git\
+		 feh\
                  dmenu
 
 mkdir tmp-clone
