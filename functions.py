@@ -118,8 +118,17 @@ def install():
         
         classes.BootLoader.inst_grub()
 
-        classes.Command.passwd('root')
-        classes.Command.user_add()
+        try:
+            classes.Command.passwd('root')
+        except classes.ArchException as e:
+            print(e.msg)
+        
+        try:
+            classes.Command.user_add()
+        except:
+            print(e.msg)
+        
+        classes.enable_services()
         classes.Mounter.umount(None, umall=True)
         print('Installation Completed Successfully. Please Reboot :)')
     
