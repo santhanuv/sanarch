@@ -26,8 +26,10 @@ case $inp in
 		;;
 esac
 
-sudo pacman --needed -S $vd
-
+if ! [ -z "$vd" ]
+then
+	sudo pacman --needed -S $vd
+fi
 
 if pacman -Q | grep -i paru &> /dev/null
 then
@@ -73,6 +75,12 @@ sudo cp "$fontSrc/VolumeIcons/fonts/VolumeIcons.ttf" "$fontDist/VolumeIcons"
 
 fc-cache
 
+if [ -d .config/wallpapers ]
+then
+	mv .config/wallpapers bak/wallpapers-bak
+fi
+cp -r ./tmp-clone/wallpapers $HOME/.config/
+
 if [ -d .config/alacritty ]
 then
     mv .config/alacritty bak/alacritty-bak
@@ -92,4 +100,5 @@ fi
 mkdir -p ~/.xmonad
 cp ./tmp-clone/wm/xmonad/xmonad.hs $HOME/.xmonad/xmonad.hs
 
+echo "xsetroot -cursor_name left_ptr &" >> $HOME/.xinitrc
 echo "exec xmonad" >> $HOME/.xinitrc
