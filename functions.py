@@ -119,7 +119,6 @@ def install():
         classes.BootLoader.inst_grub()
 
         classes.Command.enable_services()
-        print('Installation Completed Successfully. Please Reboot :)')
     
     except classes.ArchException as e:
         print(e.msg)
@@ -138,6 +137,7 @@ def finalize_install():
 
     try:
         classes.Command.user_add()
+        print('Installation Completed Successfully. Please Reboot :)')
     except:
         print(e.msg)
     finally:
