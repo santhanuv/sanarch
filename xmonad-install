@@ -1,11 +1,13 @@
 #!/bin/bash
 
+set -e
+
 echo "Updating System..."
 
 sudo pacman --noconfirm -Syu
 sudo pacman --noconfirm --needed -S git base-devel xorg-xinit xorg-server xorg-xsetroot
 
-echo "1. nvidia\t2. xf86-video-amdgpu\t3. xf86-video-intel"
+echo -e '1. nvidia\t2. xf86-video-amdgpu\t3. xf86-video-intel\t4. Skip'
 read -r -p "Choose the driver(Default 1): " inp
 
 case $inp in
@@ -62,7 +64,7 @@ $helper --needed --noconfirm -S ttf-iosevka\
 
 mkdir tmp-clone
 mkdir bak
-git clone https://github.com/santhanuv17/dotfiles.git ./tmp-clone
+git clone https://github.com/santhanuv17/dotfiles.git ./tmp-clone || { echo "Unable to clone"; exit;  }
 
 fontSrc="./tmp-clone/fonts"
 fontDist="/usr/local/share/fonts/ttf"
@@ -75,30 +77,48 @@ sudo cp "$fontSrc/VolumeIcons/fonts/VolumeIcons.ttf" "$fontDist/VolumeIcons"
 
 fc-cache
 
-if [ -d .config/wallpapers ]
+if [ -d $HOME/.config/wallpapers ]
 then
-	mv .config/wallpapers bak/wallpapers-bak
+	mv $HOME/.config/wallpapers bak/wallpapers-bak
 fi
 cp -r ./tmp-clone/wallpapers $HOME/.config/
 
-if [ -d .config/alacritty ]
+if [ -d $HOME/.config/alacritty ]
 then
-    mv .config/alacritty bak/alacritty-bak
+    mv $HOME/.config/alacritty bak/alacritty-bak
 fi
 cp -r ./tmp-clone/terminals/alacritty $HOME/.config/
 
-if [ -d .config/polybar ]
+if [ -d $HOME/.config/polybar ]
 then
-    mv .config/polybar bak/polybar-bak
+    mv $HOME/.config/polybar bak/polybar-bak
 fi
 cp -r ./tmp-clone/bars/polybar-xmonad $HOME/.config/polybar
 
-if [ -d ~/.xmonad ]
+if [ -d $HOME/.xmonad ]
 then
-    mv ~/.xmonad bak/xmonad-bak
+    mv $HOME/.xmonad bak/xmonad-bak
 fi
-mkdir -p ~/.xmonad
+mkdir -p $HOME/.xmonad
 cp ./tmp-clone/wm/xmonad/xmonad.hs $HOME/.xmonad/xmonad.hs
 
-echo "xsetroot -cursor_name left_ptr &" >> $HOME/.xinitrc
-echo "exec xmonad" >> $HOME/.xinitrc
+if ! [ -f $HOME/.xinitrc ]
+then
+	touch $HOME/.xinitrc
+fi
+
+setCursorCmd="xsetroot -cursor_name left_ptr &"
+if ! grep -Fxq "$setCursorCmd" "$HOME/.xinitrc"
+then
+	echo $setCursorCmd >> $HOME/.xinitrc
+fi
+
+execCmd="exec xmonad"
+if ! grep -Fxq "$execCmd" "$HOME/.xinitrc"
+then
+	echo $execCmd >> $HOME/.xinitrc
+fi
+
+rm -rf ./tmp-clone
+echo "All the existing configuarations files are moved to $PWD/bak"
+echo "Run xmonad using startx command"
