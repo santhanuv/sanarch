@@ -310,7 +310,8 @@ class Command():
         """
         services = ArchInstaller.get_config_info()['services']
         for service in services:
-            proc = Popen(['systemctl', 'enable', service], text=True, stdout=PIPE, stderr=PIPE)
+            scommand = f'{Command.chroot} {Command.chroot_loc} systemctl enable {service}'
+            proc = Popen([scommand, service], text=True, stdout=PIPE, stderr=PIPE)
             proc.communicate()
 
             if proc.returncode != 0:
