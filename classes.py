@@ -422,6 +422,7 @@ class Command():
         if user == 'root':
             user = ''
         
+        ArchInstaller.que.put_nowait('Enter the Root password\n')
         proc = Popen(f'{chroot} {loc} passwd ' + user, shell=True, text=True)
         proc.communicate()
 
@@ -451,6 +452,7 @@ class Command():
                 name = input('Enter user Name: ')
                 groups = input('Enter the groups: ')
         
+        ArchInstaller.que.put_nowait(f'Enter the password for {name}\n')
         command = f'{chroot} {loc} useradd -mG {groups} {name}'
         proc = Popen(command, shell=True, text=True)
         proc.communicate()
