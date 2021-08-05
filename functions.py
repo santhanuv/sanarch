@@ -118,20 +118,28 @@ def install():
         
         classes.BootLoader.inst_grub()
 
-        classes.Command.passwd('root')
-        classes.Command.user_add()
-        classes.Mounter.umount(None, umall=True)
-        print('Installation Completed Successfully. Please Reboot :)')
+        classes.Command.enable_services()
     
     except classes.ArchException as e:
         print(e.msg)
         sys.exit(e.return_code)
-    finally:
         classes.ArchInstaller.set_run_state(False)
 
 
+def finalize_install():
+    """
+        Finalize the install by setting the root password and creating the user.
+    """
+    try:
+        classes.Command.passwd('root')
+    except classes.ArchException as e:
+        print(e.msg)
 
-
-
-
-
+    try:
+        classes.Command.user_add()
+        print('Installation Completed Successfully. Please Reboot :)')
+    except:
+        print(e.msg)
+    finally:
+        classes.ArchInstaller.set_run_state(False)
+        classes.Mounter.umount(None, umall=True)

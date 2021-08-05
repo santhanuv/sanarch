@@ -310,13 +310,14 @@ class Command():
         """
         services = ArchInstaller.get_config_info()['services']
         for service in services:
-            proc = Popen(['systemctl', 'enable', service], text=True, stdout=PIPE, stderr=PIPE)
+            scommand = f'{Command.chroot} {Command.chroot_loc} systemctl enable {service}'
+            proc = Popen(scommand, text=True, stdout=PIPE, stderr=PIPE, shell=True)
             proc.communicate()
 
             if proc.returncode != 0:
                 ArchInstaller.que.put_nowait(f'[ ERR] Unable to enable {service}\nCheck if the service is installed or the name is correct!')
             else:
-                ArchInstaller.que.put_nowait(f'[ OK ] Successfully enable {service}\n')
+                ArchInstaller.que.put_nowait(f'[ OK ] Successfully enabled {service}\n')
 
 
     @staticmethod

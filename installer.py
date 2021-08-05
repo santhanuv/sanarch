@@ -36,5 +36,7 @@ p1.join()
 t_install.start()
 t_install.join()
 
+functions.finalize_install()
+
 t2.join()
 
