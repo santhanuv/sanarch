@@ -421,9 +421,11 @@ class Command():
         loc = Command.chroot_loc
 
         if user == 'root':
+            ArchInstaller.que.put_nowait(f'Enter root password\n')
             user = ''
+        else:
+            ArchInstaller.que.put_nowait(f'Enter the new password for {user}\n')
         
-        ArchInstaller.que.put_nowait(f'Enter the {user} password\n')
         proc = Popen(f'{chroot} {loc} passwd ' + user, shell=True, text=True)
         proc.communicate()
 
