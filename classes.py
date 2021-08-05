@@ -423,7 +423,7 @@ class Command():
         if user == 'root':
             user = ''
         
-        ArchInstaller.que.put_nowait('Enter the Root password\n')
+        ArchInstaller.que.put_nowait(f'Enter the {user} password\n')
         proc = Popen(f'{chroot} {loc} passwd ' + user, shell=True, text=True)
         proc.communicate()
 
@@ -453,7 +453,6 @@ class Command():
                 name = input('Enter user Name: ')
                 groups = input('Enter the groups: ')
         
-        ArchInstaller.que.put_nowait(f'Enter the password for {name}\n')
         command = f'{chroot} {loc} useradd -mG {groups} {name}'
         proc = Popen(command, shell=True, text=True)
         proc.communicate()
@@ -482,7 +481,11 @@ class Command():
         if proc.returncode != 0:
             raise ArchException('Unable to edit sudoers', 2)
         
-        rcode = Command.passwd(name)
+        try:
+            rcode = Command.passwd(name)
+        except ArchException as e:
+            ArchInstaller.que.put_nowait(e.msg)
+
         if rcode != 0:
             raise ArchException('Unable set user password', 3)
         
@@ -1443,7 +1446,7 @@ class PartitionMaker():
         ArchInstaller.que.put_nowait('\n[ OK ] Partitioning Successfull.\n')
         return 0
 
-## EXCEOTIONS
+## EXCEPTIONS
 class ArchException(Exception):
     """This is the base class for all exceptions in this Installer"""
     def __init__(self, msg, return_code):
