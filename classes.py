@@ -420,17 +420,18 @@ class Command():
         chroot = Command.chroot
         loc = Command.chroot_loc
 
+        name = user
         if user == 'root':
-            ArchInstaller.que.put_nowait(f'Enter root password\n')
+            ArchInstaller.que.put_nowait(f'Enter root password:\n')
             user = ''
         else:
-            ArchInstaller.que.put_nowait(f'Enter the new password for {user}\n')
+            ArchInstaller.que.put_nowait(f'Enter the new password for {user}:\n')
         
         proc = Popen(f'{chroot} {loc} passwd ' + user, shell=True, text=True)
         proc.communicate()
 
         if proc.returncode != 0:
-            raise ArchException(f'Unable to set {user} password', 1)
+            raise ArchException(f'Unable to set {name} password', 1)
 
         return 0
 
@@ -484,14 +485,11 @@ class Command():
             raise ArchException('Unable to edit sudoers', 2)
         
         try:
-            rcode = Command.passwd(name)
+            Command.passwd(name)
         except ArchException as e:
-            ArchInstaller.que.put_nowait(e.msg)
-
-        if rcode != 0:
             raise ArchException('Unable set user password', 3)
         
-        return
+        return 0
                 
 
 class BootLoader():

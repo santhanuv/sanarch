@@ -138,7 +138,7 @@ def finalize_install():
     try:
         classes.Command.user_add()
         print('Installation Completed Successfully. Please Reboot :)')
-    except:
+    except classes.ArchException as e:
         print(e.msg)
     finally:
         classes.ArchInstaller.set_run_state(False)
