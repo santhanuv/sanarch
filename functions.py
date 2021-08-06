@@ -37,7 +37,9 @@ def argument_parsing():
     args = parser.parse_args()
     
     if args.yes:
-        yes = args.yes
+        yes = True
+    else:
+        yes = False
     
     return (args.pf, args.cf, yes)
 
@@ -54,8 +56,9 @@ def intialize_install(PART_FILE, CONF_FILE, DEFAULT):
     # PartitionMaker
     global part_maker
     part_maker = classes.PartitionMaker()
-    if DEFAULT == None:
-        if not part_maker.ask_confirmation():
+    if not DEFAULT:
+        res = part_maker.ask_confirmation():
+        if not res:
             print("Please change partition configuration and confirm to continue.")
             sys.exit(0)
 
