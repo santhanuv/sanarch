@@ -130,15 +130,24 @@ def finalize_install():
     """
         Finalize the install by setting the root password and creating the user.
     """
+
+    root_pass_stat = False
+    user_stat = False
+
     try:
         classes.Command.passwd('root')
+        root_pass_stat = True
     except classes.ArchException as e:
         print(e.msg)
 
     try:
         classes.Command.user_add()
-        print('Installation Completed Successfully. Please Reboot :)')
+        user_stat = True
+        
     except classes.ArchException as e:
         print(e.msg)
-    finally:
-        classes.ArchInstaller.set_run_state(False)
+
+    if root_pass_stat and user_stat:
+        print('Installation Completed Successfully. Please Reboot :)')
+    
+    classes.ArchInstaller.set_run_state(False)

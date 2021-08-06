@@ -722,13 +722,12 @@ class SysClockUpdator():
     
         # Return system call is active
         if re_out.group(1).strip().lower() != 'active':
-            status_msg = cls.SETTING_CLOCK
             cls.CURR_STATE = cls.STATE_INCOMPLETED
         else:
             status_msg = cls.ALREADY_ACTIVE
             cls.CURR_STATE = cls.STATE_COMPLETED
-
-        ArchInstaller.que.put_nowait(status_msg)
+            ArchInstaller.que.put_nowait(status_msg)
+        
         return
     
     @classmethod
