@@ -142,4 +142,3 @@ def finalize_install():
         print(e.msg)
     finally:
         classes.ArchInstaller.set_run_state(False)
-        classes.Mounter.umount(None, umall=True)
