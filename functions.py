@@ -101,7 +101,8 @@ def partition():
     try:
         classes.Command.verify_efi_boot()
         classes.SysClockUpdator().update_sys_clock()
-        part_maker.partition()
+        if part_maker.partition() == -1:
+            sys.exit(0)
     except classes.ArchException as e:
         print(e.msg)
         sys.exit(e.return_code)

@@ -1397,12 +1397,9 @@ class PartitionMaker():
         #cur_devices = self.get_part_details()
         
         if not self.is_part:
-            confirm = False
-
-        if confirm == False:
             part_file = ArchInstaller.PART_FILE
             print(f'Edit the {part_file} file and continue.')
-            return 0
+            return -1
         
         # Unmount all Disks if mounted
         if Mounter.findmnt('/mnt')[0] == 0:
