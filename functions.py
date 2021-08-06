@@ -54,9 +54,10 @@ def intialize_install(PART_FILE, CONF_FILE, DEFAULT):
     # PartitionMaker
     global part_maker
     part_maker = classes.PartitionMaker()
-    if not part_maker.ask_confirmation():
-        print("Please change partition configuration and confirm to continue.")
-        sys.exit(0)
+    if DEFAULT == None:
+        if not part_maker.ask_confirmation():
+            print("Please change partition configuration and confirm to continue.")
+            sys.exit(0)
 
 def dequeue(p1, p2):
 
