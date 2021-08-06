@@ -51,8 +51,12 @@ def intialize_install(PART_FILE, CONF_FILE, DEFAULT):
     classes.ArchInstaller.set_files(PART_FILE, CONF_FILE)
     classes.ArchInstaller.set_queue(que)
     classes.ArchInstaller.set_run_state(True)
-
-
+    # PartitionMaker
+    global part_maker
+    part_maker = classes.ArchInstaller.PartitionMaker()
+    if not part_maker.ask_confirmation():
+        print("Please change partition configuration and confirm to continue.")
+        sys.exit(0)
 
 def dequeue(p1, p2):
 
@@ -97,7 +101,7 @@ def partition():
     try:
         classes.Command.verify_efi_boot()
         classes.SysClockUpdator().update_sys_clock()
-        classes.PartitionMaker().partition()
+        part_maker.partition()
     except classes.ArchException as e:
         print(e.msg)
         sys.exit(e.return_code)

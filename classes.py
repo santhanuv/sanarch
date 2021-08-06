@@ -1204,7 +1204,7 @@ class PartitionMaker():
         """
 
         self.part_info = ArchInstaller.get_part_info()
-        self.default = ArchInstaller.get_default()
+        self.is_part = ArchInstaller.get_default()
         Partitioner.set_msg(
             ERR_PARTITION=PartitionMaker.ERR_PARTITION, 
             ERR_MBR=PartitionMaker.ERR_MBR,
@@ -1380,9 +1380,11 @@ class PartitionMaker():
         
         confirmation = input(question)
         if confirmation in ('y', 'Y'):
-            return True
+            self.is_part = True
         else:
-            return False
+            self.is_part = False
+
+        return self.is_part
 
 
     def partition(self):
@@ -1394,10 +1396,9 @@ class PartitionMaker():
 
         #cur_devices = self.get_part_details()
         
-        if not self.default:
-            confirm = self.ask_confirmation()
-        else:
-            confirm = True
+        if not self.is_part:
+            print("Please confirm Parition configuraion to continue or use -y with the command.")
+            sys.exit(0)
         
         if confirm == False:
             part_file = ArchInstaller.PART_FILE
