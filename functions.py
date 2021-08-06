@@ -57,7 +57,7 @@ def intialize_install(PART_FILE, CONF_FILE, DEFAULT):
     global part_maker
     part_maker = classes.PartitionMaker()
     if not DEFAULT:
-        res = part_maker.ask_confirmation():
+        res = part_maker.ask_confirmation()
         if not res:
             print("Please change partition configuration and confirm to continue.")
             sys.exit(0)
