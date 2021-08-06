@@ -53,7 +53,7 @@ def intialize_install(PART_FILE, CONF_FILE, DEFAULT):
     classes.ArchInstaller.set_run_state(True)
     # PartitionMaker
     global part_maker
-    part_maker = classes.ArchInstaller.PartitionMaker()
+    part_maker = classes.PartitionMaker()
     if not part_maker.ask_confirmation():
         print("Please change partition configuration and confirm to continue.")
         sys.exit(0)
