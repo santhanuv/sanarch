@@ -1328,7 +1328,7 @@ class PartitionMaker():
         return part_info_str
 
 
-    def ask_confirmation(self,part_info):
+    def ask_confirmation(self):
 
         """
             Ask confimation from the user for partitiong.
@@ -1343,7 +1343,7 @@ class PartitionMaker():
 
         sys.stdout.write("\x1b[2J\x1b[H")
         
-        for dev in part_info:
+        for dev in self.part_info:
             name = dev['name']
             label = dev['part table']
             print(f'DEVICE\t{name}\nPARTITION TABLE\t{label}')
@@ -1395,7 +1395,7 @@ class PartitionMaker():
         #cur_devices = self.get_part_details()
         
         if not self.default:
-            confirm = self.ask_confirmation(self.part_info)
+            confirm = self.ask_confirmation()
         else:
             confirm = True
         
