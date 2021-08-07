@@ -3,7 +3,7 @@
 Automated Arch Linux installer written in python, to learn Python :).
 
 ## Configuration Files
-part_file: Contains information about how to partition the disk in JSON format. \br
+part_file: Contains information about how to partition the disk in JSON format. <br>
 config_file: Contains information about installation in JSON format.
 
 ## Installation
