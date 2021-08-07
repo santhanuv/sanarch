@@ -1,13 +1,23 @@
 # Arch-Installer
 
-An automated Arch Linux installer.
+Automated Arch Linux installer written in python, to learn Python :).
 
-### To install run the installer.py program with part_file and config_file as first and second argument. For no confirmation for the partition use -y
+## Configuration Files
+part_file: Contains information about how to partition the disk in JSON format.
+config_file: Contains information about installation in JSON format.
 
-The partition information needed to partition the Disk should be specified in a file in JSON format.
- ### An example in part_file
- The configuration information needed to configure the system should be specified in a file in JSON format.
- ### An example in config_file
+## Installation
+
+After Booting into live environment:
+```
+pacman -Syy git
+git clone https://github.com/santhanuv17/arch-installer.git
+cd arch-installer
+python installer.py part_file config_file
+```
+
+## Options
+-y : Installs without asking confirmation.
 
 # Current File System support.
 1. ext4
