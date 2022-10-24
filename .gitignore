@@ -1,1 +1,4 @@
-__pycache__
+build/
+Archsan.egg-info/
+__pycache__/
+*.pyc

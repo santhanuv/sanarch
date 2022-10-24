@@ -1,0 +1,100 @@
+# Configuration for Partitioning the disks
+
+# If a partition 3 exist without partition 2, 3 should be removed first so that there will be same the create a partition 2
+# So specify that in remove-partitions
+
+
+partlabel:
+  # disk: specify the path of the disk to format
+    - device: /dev/sda 
+      # partitions: specify all the partitions for the mentitioned disk
+      # K
+      wipe: False
+      remove-partitions: [] # Only use remove-partitions to remove partitions that you don't need and use size: 0 with overwrite 
+                            # option to the previous partition to extend that partition. Using remove partition to remove and create 
+                            # the same partition causes the sector to start at random places for the first partition. 
+      partitions:
+        - number: 1
+          overwrite: False
+          exists: False # Check if a partition exits
+          label: efi
+          type: ef00
+          fs: vfat
+          force-format: True # vfat will always overwrite
+          size: 512Mib
+          mountpoint: /mnt/boot/efi
+        - number: 2
+          fs: btrfs
+          force-format: True # Force formatting
+          exists: False
+          overwrite: True # Recreate the partition
+          size: 20g  # If a partition exist, then 0 is going to use the size of the existing partition,
+                  # use exits to check if the partition exits
+          mountpoint: /mnt
+          mountoptions: noatime,compress=zstd:2,space_cache=v2,ssd,discard=async
+          subvolumes:
+            - name: '@'
+              mountpoint: /mnt
+            - name: '@log'
+              mountpoint: /mnt/var/log
+            - name: '@pkg'
+              mountpoint: /mnt/var/cache/pacman/pkg/
+            - name: '@tmp'
+              mountpoint: /mnt/tmp
+            - name: '@snapshots'
+              mountpoint: /mnt/.snapshots
+        - number: 3
+          exist: False
+          overwrite: True
+          label: root
+          fs: xfs
+          force-format: True
+          size: !!str 0
+          mountpoint: /mnt/home
+
+
+base-packages: 
+  - base
+  - linux
+  - linux-firmware
+  - vim
+  - git
+  - amd-ucode
+
+timezone-region: Asia
+timezone-city: Kolkata
+locales-use-default: True # Add the default locales [ #en_us.UTF-8 UTF-8 ]
+locale_LANG: en_US.UTF-8 # default is "en_US.UTF-8"
+#locale_KEYMAP: NULL # default is NULL
+hostname: sanArch # Hostname for the machine # Default: ArchLinux
+bootloader: grub
+
+users:
+  - name: san # Unprevilaged user
+    create-home: True # Weather to create the the home directory # Default True
+    groups: [wheel, audio, video, storage] # List of groups for the user
+
+packages:
+  - polkit
+  - networkmanager
+  - network-manager-applet
+  - dialog
+  - wpa_supplicant
+  - mtools
+  - dosfstools
+  - reflector
+  - base-devel
+  - xdg-user-dirs
+  - xdg-utils
+  - pipewire
+  - pipewire-pulse
+  - openssh
+  - bluez
+  - bluez-utils
+
+enable-services:
+  - NetworkManager.service
+  - bluetooth.service
+
+after-scripts: # list of paths to run scripts
+  /tmp/scripts/install
