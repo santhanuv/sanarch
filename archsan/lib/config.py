@@ -4,12 +4,12 @@ import yaml
 from lib.disk.partition import Partition
 
 class Config:
-    PARTITION_KEYS = ["label", "number", "type", "fs", "size", "mountpoint", "mountoptions", "subvolumes", "overwrite", "exists"]
+    PARTITION_KEYS = ["label", "number", "type", "fs", "size", "mountpoint", "mountoptions", "subvolumes", "overwrite", "skip-format", "exists"]
     PARTITION_KEYS_ASSERT = ["number", "fs", "size", "mountpoint"]
     PARTLABEL_KEYS = ["device", "wipe", "partitions", "skip-partition", "remove-partitions"]
     CONFIG_KEYS = ["partlabel", "base-packages"]
     OPTIONAL_CONFIG_KEYS = ["timezone-region", "timezone-city", "locales-use-default", "locales", "locale_LANG", "locale_KEYMAP", 
-                            "hostname", "temp-rootpass", "bootloader", "users", "packages"]
+                            "hostname", "temp-rootpass", "bootloader", "esp", "detect-other-os", "users", "packages", "after-scripts"]
     DEFAULT_LOCALES = ["en_US.UTF-8 UTF-8"]
     DEFAULT_LANG = "en_US.UTF-8"
     DEFAULT_HOSTNAME = "archlinux"
@@ -79,6 +79,9 @@ class Config:
         else:
             return None
 
+    @property
+    def esp(self):
+        return self.__config["esp"]
 
     @property
     def users(self):
@@ -93,6 +96,14 @@ class Config:
     def services(self):
         return self.__config["enable-services"]
 
+    @property
+    def detect_other_os(self):
+        return self.__config["detect-other-os"]
+
+    @property
+    def after_scripts(self):
+        return self.__config["after-scripts"]
+
     def get_all_devs(self):
         return [disk["device"] for disk in self.partlabel]
 
@@ -103,7 +114,7 @@ class Config:
                 "partitions":disk["partitions"], 
                 "skip-partitions": disk["skip-partition"],
                 "remove-partitions": disk["remove-partitions"],
-                "wipe": disk["wipe"]
+                "wipe": disk["wipe"],
             } 
             for disk in self.partlabel
         ]
@@ -147,6 +158,8 @@ class Config:
         for key in missing_optional_config_keys:
             if key == "locales-use-default":
                 self.__config[key] = True
+            elif key == "detect-other-os":
+                self.__config[key] = False
             else:
                 self.__config[key] = None
             
@@ -196,9 +209,11 @@ class Config:
 
                     for key in missingkeys:
                         # If type code is not given assume Linux filesystem as default (8300)
-                        if key == "type":
+                        if key == "path":
+                            partition["path"] = f'{dev["device"]}/{partition["number"]}'
+                        elif key == "type":
                             partition["type"] = '8300'
-                        elif key in ["overwrite", "exists", "force-format"]:
+                        elif key in ["overwrite", "exists", "force-format", "skip-format"]:
                             partition[key] = False
                         else:
                             partition[key] = None
@@ -222,7 +237,7 @@ class Config:
             dir = dir.parent
             root = dir.parts[-1]
         
-        file_path = dir / 'profiles/default.yaml'
+        # file_path = dir / 'profiles/default.yaml'
         
         with open(config_file) as f:
             return yaml.safe_load(f)

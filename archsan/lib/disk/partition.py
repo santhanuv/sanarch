@@ -16,9 +16,10 @@ class Partition:
     path:str = field(default=None, compare=True)
     type: str = field(default="0", compare=True)
     typename: str = field(default=None, compare=False)
-    name: str = field(default=None, compare=False)
+    name: str = field(default=None, compare=True)
     label: str = field(default=None, compare=False)
     uuid: str = field(default=None, compare=False)
+    skip_format: bool = field(default=False, compare=False)
     mountpoint: InitVar[str] = field(default=None, compare=False)
     fs: InitVar[str] = field(default=None, compare=False)
     force_format: InitVar[bool] = field(default=False, compare=False)
@@ -28,7 +29,7 @@ class Partition:
     check_exists: bool = field(default=False, compare=False)
     filesystem: FileSystem = field(default=None, init=False, compare=False)
 
-    def __post_init__(self, mountpoint, fs, force_format, mountoptions, subvolumes):
+    def __post_init__(self, mountpoint, fs, force_format, mountoptions, subvolumes):      
         if not self.path:
             self.path = f'{self.device}{self.number}'
 
@@ -115,7 +116,7 @@ class Partition:
 
         sgdisk(self.device, args=args)
 
-        self.path = f'{self.device}{self.number}'
+        # self.path = f'{self.device}{self.number}'
         
         return self.number
 
@@ -133,7 +134,8 @@ class Partition:
         if not self.path:
             raise Exception("No partition found! Create the partition first")
 
-        self.filesystem.format()
+        if not self.skip_format:
+            self.filesystem.format()
 
     def mount(self):
         # if not self.mountpoint:

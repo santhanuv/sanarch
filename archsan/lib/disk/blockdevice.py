@@ -8,6 +8,7 @@ from dataclasses import asdict, dataclass, field, InitVar
 from typing import ClassVar
 from pathlib import Path
 from lib.logger import Logger
+import sys
 
 @dataclass
 class BlockDevice():
@@ -39,6 +40,7 @@ class BlockDevice():
                         size=part_data["size"], 
                         type=part_data["type"], # Partition typecode for sgdisk; eg:ef00 for efi partition
                         number=part_data["number"],
+                        path=part_data["path"],
                         label=part_data["label"],
                         mountpoint=part_data["mountpoint"],
                         fs=part_data["fs"],
@@ -46,7 +48,8 @@ class BlockDevice():
                         overwrite=part_data["overwrite"],
                         check_exists=part_data["exists"],
                         force_format=part_data["force-format"],
-                        subvolumes=part_data["subvolumes"]
+                        subvolumes=part_data["subvolumes"],
+                        skip_format=part_data["skip-format"],
                     )
                     self.partitions.append(partition_obj)
                 except KeyError as e:
@@ -139,7 +142,7 @@ class BlockDevice():
                     self.logger.error("Unable to correct the partition error")
                     dywc = input("Do you want to continue ?(yes/no): ").lower()
                     if dywc == 'no' or dywc == 'n':
-                        SystemExit()
+                        sys.exit()
                     else:
                         self.logger.warn("Warining - Continuing with bad partitiong")  
                 else:
@@ -179,9 +182,9 @@ class BlockDevice():
                 else:
                     # Log
                     print("Change the configuration and continue")
-                    SystemExit()
+                    sys.exit()
             else:
-                self.logger.info("Using existing partition", curr_partition.number)
+                self.logger.info(f'Using existing partition {curr_partition.number}')
         # Check if the size of partition is greater the existing partition
         elif partition > curr_partition:
             # Check if the current partition is the last partition available
@@ -238,6 +241,7 @@ class BlockDevice():
                         break
  
                 if not found:
+                    # If check exists option is specified in the config; checks if the partition exists
                     if partition.check_exists:
                         raise Exception(f"Partition {partition.number} doesn't exist.")
 
@@ -245,6 +249,7 @@ class BlockDevice():
                     avail_size = Config.parseSize(avail_size_raw)
                     no_space_msg = f'No space available for Partition-{partition.number}'
 
+                    # Minimum partition size should atleast be 2mib for the partition to aligned right
                     if partition.size == '0':
                         if Partition.cmp_size(avail_size, Partition.MIN_SIZE) == 1:
                             partition.write_partition()
@@ -294,7 +299,7 @@ class BlockDevice():
             partnum = partition["path"][-1]
             partcode = part_typecodes[partnum]
             part = Partition(
-                name=partition["name"],
+                path=f'/dev/{partition["name"]}',
                 label=partition["partlabel"],
                 number=partnum,
                 size=partition["size"],
@@ -309,6 +314,7 @@ class BlockDevice():
 
     def remove_partitions(self, partnums: list[int]):
         for partnum in partnums:
+            self.logger.debug(f"Removing partitions {partnum}")
             try:
                 Partition.delete_partition_with_number(self.path, partnum)
             except CommandError as e:

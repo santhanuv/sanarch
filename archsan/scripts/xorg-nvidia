@@ -1,0 +1,41 @@
+#!/bin/bash
+
+set -e
+
+echo "Updating System"
+pacman --noconfirm -Syu
+echo "Installing nvidia driver packages"
+pacman --noconfirm --needed -S xorg-server xorg-xinit xorg-xsetroot nvidia nvidia-utils
+
+echo "Adding nvidia modules to mkinitcpio.conf to resolve startup issues"
+filename=/etc/mkinitcpio.conf
+modules=("nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm")
+if $(grep -q '^MODULES=()$' $filename); then
+	printf -v mod_string "%s " "${modules[@]}"
+	sed -i "s|^MODULES=()|MODULES=($mod_string)|" $filename
+	sed -i "s|^MODULES=(\(.\+\) )|MODULES=(\1)|" $filename
+else
+	for module in ${modules[@]}; do
+		if ! $(grep -q "^MODULES=(.*\b$module\b.*)" $filename); then
+			sed -i "s|^MODULES=(\(.\+\))|MODULES=(\1 $module)|" $filename
+		fi
+	done
+fi
+
+echo "Creating pacman hook to update initramfs automatically on nvidia driver updates"
+mkdir -p /etc/pacman.d/hooks
+printf "\n#Update initramfs on nvida updates\n[Trigger]\n\
+Operation=Install\n\
+Operation=Upgrade\n\
+Operation=Remove\n\
+Type=Package\n\
+Target=nvidia\n\
+Target=linux\n\n\
+[Action]\n\
+Description=Update NVIDIA module in initcpio\n\
+Depends=mkinitcpio\n\
+When=PostTransaction\n\
+NeedsTargets\n\
+Exec=/bin/sh -c 'while read -r trg; do case $trg in linux) exit 0; esac; done; /usr/bin/mkinitcpio -P'\n" >> /etc/pacman.d/hooks/nvidia.hook
+
+mkinitcpio -P

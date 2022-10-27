@@ -1,4 +1,6 @@
 from pathlib import Path
+import shutil
+from tempfile import tempdir
 from lib.exceptions import CommandError
 from lib.utils.pacman import Pacman
 from lib.utils.bootloader import Bootloader, Grub, bootloader_helper
@@ -236,11 +238,11 @@ class ArchInstaller:
         self.logger.debug("Updated root password")
 
     def setup_bootloader(self):
+        esp = self.config.esp
         if self.config.bootloader:
             self.logger.debug("Installing bootloader")
-            
             bootloader: Bootloader = bootloader_helper(self.config.bootloader)
-            bootloader.install()
+            bootloader.install(esp, detect_other_os=self.config.detect_other_os)
 
             self.logger.info("Successfully installed bootloader")
         else:
@@ -332,6 +334,38 @@ class ArchInstaller:
         
         self.logger.info("Enabled system services")
 
+    def run_after_scripts(self):
+        TEMP_DIR = "/mnt/temp/archsan/scripts/"
+        dest = Path(TEMP_DIR)
+        dest.mkdir(parents=True, exist_ok=True)
+
+        scripts = self.config.after_scripts
+        for script in scripts:
+            name = script["prog"]
+            path:str = script["path"]
+
+            if path[0] != "/":
+                src = Path(__file__).resolve().cwd() / f"archsan/{path}"
+            else:
+                src = Path(path)
+            
+            shutil.copy(src, dest)
+            script_name = path.split("/")[-1]
+            path = TEMP_DIR.removeprefix("/mnt") + script_name
+            args = [path]
+
+            if script["args"]:
+                args += script["args"]
+
+            self.logger.info(f"Running script {name} {' '.join(args)}")
+            Command(name, args=args, capture_output=False)(arch_chroot=True)
+
+    def update_context(self, curr_install_state):
+        context = {"install_state": curr_install_state}
+        Path("/tmp/archsan").mkdir(parents=True, exist_ok=True)
+        with open("/tmp/archsan/context.json", "w") as context_file:
+            json.dump(context, context_file)
+
     def install(self, install_state = 0):
         if install_state is None:
             install_state = 0
@@ -378,16 +412,19 @@ class ArchInstaller:
             if install_state < 12:
                 self.enable_serivces()
                 curr_install_state += 1
+            if install_state < 13:
+                self.run_after_scripts()
+                curr_install_state += 1
 
+            self.update_context(curr_install_state)
         except exceptions.NoInternet as e:
+            import sys
             self.logger.critical("No internet connection")
-            SystemExit(1)
+            sys.exit(1)
         except exceptions.UpdateError as e:
             self.logger.warn(f"Unable to Update System Clock\n---\nError:\n{e}\n---\n")
         except Exception as e:
-            context = {"install_state": curr_install_state}
-            Path("/tmp/archsan").mkdir(parents=True, exist_ok=True)
-            with open("/tmp/archsan/context.json", "w") as context_file:
-                json.dump(context, context_file)
+            self.logger.critical(f'{e}\nExiting...')
+            self.update_context(curr_install_state)
         
         
