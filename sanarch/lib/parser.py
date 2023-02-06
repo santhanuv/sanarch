@@ -10,7 +10,7 @@ def parse_userpass(userpass_list):
         
 
 def init_argparse():
-    parser = argparse.ArgumentParser(description="Automation tool for arch linux installation from profile")
+    parser = argparse.ArgumentParser(prog="sanarch", description="Automation tool for arch linux installation from profile")
     init_argparse_arguments(parser)
     args = parser.parse_args()
     args.userpass = parse_userpass(args.userpass)

@@ -1,13 +1,13 @@
-from lib.config import Config
-from lib.disk.partition import Partition
-from lib.exceptions import CommandError
-from lib.menu.menu import MenuItem
-from lib.linuxcmd import lsblk_json, wipefs, get_avail_space, sgdisk
+from sanarch.lib.config import Config
+from sanarch.lib.disk.partition import Partition
+from sanarch.lib.exceptions import CommandError
+#from sanarch.lib.menu.menu import MenuItem
+from sanarch.lib.linuxcmd import lsblk_json, wipefs, get_avail_space, sgdisk
+from sanarch.lib.logger import Logger
 import json
 from dataclasses import asdict, dataclass, field, InitVar
 from typing import ClassVar
 from pathlib import Path
-from lib.logger import Logger
 import sys
 
 @dataclass

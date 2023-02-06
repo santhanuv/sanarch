@@ -2,7 +2,7 @@ import subprocess
 
 from dataclasses import dataclass, field
 from typing import Optional
-from lib.exceptions import CommandError
+from sanarch.lib.exceptions import CommandError
 from typing import Union, TextIO
  
 @dataclass

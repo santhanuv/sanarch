@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
 from typing import ClassVar
-from lib.utils.pacman import Pacman
+from sanarch.lib.utils.pacman import Pacman
 from pathlib import Path
-from lib.command import Command
+from sanarch.lib.command import Command
 
 def bootloader_helper(bootloader):
     match bootloader:

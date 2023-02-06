@@ -1,5 +1,5 @@
-from lib.command import Command, CommandError
-from lib import logger
+from sanarch.lib.command import Command, CommandError
+from sanarch.lib import logger
 from pathlib import Path
 
 def lsblk(args = None, shell = False, input = None):

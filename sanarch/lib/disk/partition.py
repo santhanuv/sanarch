@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field, InitVar
-from lib.disk.filesystem import FileSystem, filesystem_helper
-from lib.linuxcmd import sgdisk, awk
+from sanarch.lib.disk.filesystem import FileSystem, filesystem_helper
+from sanarch.lib.linuxcmd import sgdisk, awk
 from typing import ClassVar
 
 @dataclass(eq=True)

@@ -1,6 +1,6 @@
 from subprocess import PIPE
 from dataclasses import dataclass, field
-from lib.command import Command
+from sanarch.lib.command import Command
 
 @dataclass
 class Pacman:

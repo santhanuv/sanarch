@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import dataclass, field
-from lib.command import Command
+from sanarch.lib.command import Command
 from pathlib import Path
 from typing import Optional
 

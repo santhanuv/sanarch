@@ -1,7 +1,7 @@
 from logging import raiseExceptions
 from pathlib import Path
 import yaml
-from lib.disk.partition import Partition
+from sanarch.lib.disk.partition import Partition
 
 class Config:
     PARTITION_KEYS = ["label", "number", "type", "fs", "size", "mountpoint", "mountoptions", "subvolumes", "overwrite", "skip-format", "exists"]

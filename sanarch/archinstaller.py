@@ -1,19 +1,19 @@
 from pathlib import Path
 import shutil
 from tempfile import tempdir
-from lib.exceptions import CommandError
-from lib.utils.pacman import Pacman
-from lib.utils.bootloader import Bootloader, Grub, bootloader_helper
-from lib.disk.partition import Partition
-from lib.general import BootMode
-from lib.command import Command
-from lib import exceptions
-from lib.logger import Logger
-from lib.menu import menu
-from lib import linuxcmd
+from sanarch.lib.exceptions import CommandError
+from sanarch.lib.utils.pacman import Pacman
+from sanarch.lib.utils.bootloader import Bootloader, Grub, bootloader_helper
+from sanarch.lib.disk.partition import Partition
+from sanarch.lib.general import BootMode
+from sanarch.lib.command import Command
+from sanarch.lib import exceptions
+from sanarch.lib.logger import Logger
+#from sanarch.lib.menu import menu
+from sanarch.lib import linuxcmd
 import os
-from lib.config import Config
-from lib.disk.blockdevice import BlockDevice
+from sanarch.lib.config import Config
+from sanarch.lib.disk.blockdevice import BlockDevice
 import json
 
 
