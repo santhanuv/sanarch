@@ -1,7 +1,7 @@
-from archinstaller import ArchInstaller
 from pathlib import Path
 import json
-from lib import parser
+from sanarch.archinstaller import ArchInstaller
+from sanarch.lib import parser
 
 def main():
     CONTEXT_FILE_PATH = "/tmp/archsan/context.json"

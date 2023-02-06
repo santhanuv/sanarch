@@ -6,7 +6,7 @@
 
 partlabel:
   # disk: specify the path of the disk to format
-    - device: /dev/sda 
+    - device: /dev/sdb 
       # partitions: specify all the partitions for the mentitioned disk
       # K
       wipe: False
@@ -15,7 +15,7 @@ partlabel:
                             # the same partition causes the sector to start at random places for the first partition. 
       partitions:
         - number: 1
-          path: /dev/sda1
+          path: /dev/sdb1
           overwrite: True
           skip-format: False # By default false
           exists: False # Check if a partition exits
@@ -24,9 +24,9 @@ partlabel:
           fs: vfat
           force-format: True # vfat will always overwrite
           size: 512Mib
-          mountpoint: /mnt/boot/efi
+          mountpoint: /mnt/efi
         - number: 2
-          path: /dev/sda2
+          path: /dev/sdb2
           fs: btrfs
           force-format: True # Force formatting
           exists: False
@@ -47,7 +47,7 @@ partlabel:
             - name: '@snapshots'
               mountpoint: /mnt/.snapshots
         - number: 3
-          path: /dev/sda3
+          path: /dev/sdb3
           exist: False
           overwrite: True
           label: root
@@ -73,7 +73,7 @@ locale_LANG: en_US.UTF-8 # default is "en_US.UTF-8"
 #locale_KEYMAP: NULL # default is NULL
 hostname: sanArch # Hostname for the machine # Default: ArchLinux
 bootloader: grub
-esp: /boot/efi # Path to efi directory
+esp: /efi # Path to efi directory
 detect-other-os: False # By default false
 
 users:

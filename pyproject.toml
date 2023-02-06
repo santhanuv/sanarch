@@ -1,0 +1,17 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "sanarch"
+version="2.0.0"
+description = "Automated Arch Linux installtion from a config file"
+authors = { name = "Santhanu V", email = "vinodsanthanu@gmail.com" },
+requires-python = ">=3.10"
+keywords = ["arch linux", "automated arch installer", "sanarch", "arch installer"]
+dependencies = [
+    "pyyaml",
+]
+
+[project.scripts]
+sanarch = "sanarch.__main__:main"

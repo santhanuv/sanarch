@@ -111,7 +111,6 @@ class ArchInstaller:
             raise exceptions.UpdateError(e)
 
     def partition_disk(self):
-        linuxcmd.umount_all()
         for blkdev in self.blkdevs:
             try:
                 blkdev.backup_partition_table()
@@ -140,6 +139,9 @@ class ArchInstaller:
         m.display()
 
     def generate_fstab(self):
+        # Inform os about partition table updates
+        Command('partprobe')()
+
         path = Path(self.FSTAB_PATH)
         if path.exists():
             path.replace("/mnt/etc/fstab.bak")
@@ -156,6 +158,11 @@ class ArchInstaller:
 
         with open(self.FSTAB_PATH, "a") as fstab:
             Command('genfstab', args=args, stdout=fstab)()
+
+    def pacman_key_setup(self):
+        Command('pacman-key', args=['--init'])(arch_chroot=True)
+        Command('pacman-key', args=['--populate'])(arch_chroot=True)
+
 
     def set_time_zone(self):
         self.logger.debug("Setting timezone")
@@ -345,7 +352,7 @@ class ArchInstaller:
             path:str = script["path"]
 
             if path[0] != "/":
-                src = Path(__file__).resolve().cwd() / f"archsan/{path}"
+                src = Path(__file__).parent.resolve() / f"{path}"
             else:
                 src = Path(path)
             
@@ -387,6 +394,7 @@ class ArchInstaller:
             if install_state < 4:
                 self.generate_fstab()
                 curr_install_state += 1
+                self.pacman_key_setup()
             if install_state < 5:
                 self.set_time_zone()
                 curr_install_state += 1
