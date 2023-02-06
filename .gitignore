@@ -1,4 +1,5 @@
 build/
-Archsan.egg-info/
+venv/
+*.egg-info/
 __pycache__/
 *.pyc
