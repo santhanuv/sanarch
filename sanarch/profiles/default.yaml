@@ -6,7 +6,7 @@
 
 partlabel:
   # disk: specify the path of the disk to format
-    - device: /dev/sdb 
+    - device: /dev/sda 
       # partitions: specify all the partitions for the mentitioned disk
       # K
       wipe: False
@@ -15,7 +15,7 @@ partlabel:
                             # the same partition causes the sector to start at random places for the first partition. 
       partitions:
         - number: 1
-          path: /dev/sdb1
+          path: /dev/sda1
           overwrite: True
           skip-format: False # By default false
           exists: False # Check if a partition exits
@@ -26,7 +26,7 @@ partlabel:
           size: 512Mib
           mountpoint: /mnt/efi
         - number: 2
-          path: /dev/sdb2
+          path: /dev/sda2
           fs: btrfs
           force-format: True # Force formatting
           exists: False
@@ -47,7 +47,7 @@ partlabel:
             - name: '@snapshots'
               mountpoint: /mnt/.snapshots
         - number: 3
-          path: /dev/sdb3
+          path: /dev/sda3
           exist: False
           overwrite: True
           label: root
@@ -61,6 +61,7 @@ base-packages:
   - base
   - linux
   - linux-firmware
+  - archlinux-keyring
   - vim
   - git
   - amd-ucode
