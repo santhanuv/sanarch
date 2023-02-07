@@ -18,6 +18,6 @@ def init_argparse():
 
 def init_argparse_arguments(parser: argparse.ArgumentParser):
     parser.add_argument('config', type=str, help="path to config file")
+    parser.add_argument('rootpass', type=str, help="password for the root user")
+    parser.add_argument('userpass', nargs="*", type=str, help="password for non-root user | Format: {username}:{password} |")
     parser.add_argument('--resume', action='store_true', help="resume installation from the last success point")
-    parser.add_argument('--rootpass', type=str, help="password for the root user")
-    parser.add_argument('--userpass', nargs="*", type=str, help="password for non-root user | Format: {username}:{password} |")
