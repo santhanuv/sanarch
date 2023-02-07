@@ -1,0 +1,97 @@
+partlabel:
+  - device: /dev/nvme0n1
+    wipe: False
+    remove-partitions: [5,6,7]
+    partitions:
+      - number: 1
+        path: /dev/nvme0n1p1
+        overwrite: False
+        skip-format: True
+        exists: True
+        label: efi
+        type: ef00
+        fs: vfat
+        force-format: False
+        size: !!str 0
+        mountpoint: /mnt/efi
+      - number: 5
+        path: /dev/nvme0n1p5
+        fs: btrfs
+        force-format: True # Force formatting
+        exists: False
+        overwrite: True # Recreate the partition
+        skip-format: False
+        size: 12g  # If a partition exist, then 0 is going to use the size of the existing partition,
+                # use exits to check if the partition exits
+        mountpoint: /mnt
+        mountoptions: noatime,compress=zstd:2,space_cache=v2,ssd,discard=async
+        subvolumes:
+          - name: '@'
+            mountpoint: /mnt
+          - name: '@log'
+            mountpoint: /mnt/var/log
+          - name: '@pkg'
+            mountpoint: /mnt/var/cache/pacman/pkg/
+          - name: '@tmp'
+            mountpoint: /mnt/tmp
+          - name: '@snapshots'
+            mountpoint: /mnt/.snapshots
+      - number: 6
+        path: /dev/nvme0n1p6
+        exist: False
+        overwrite: True
+        skip-format: False
+        label: root
+        fs: xfs
+        force-format: True
+        size: !!str 0
+        mountpoint: /mnt/home
+
+base-packages: 
+  - base
+  - linux
+  - linux-firmware
+  - vim
+  - git
+  - amd-ucode
+  - btrfs-progs
+
+timezone-region: Asia
+timezone-city: Kolkata
+locales-use-default: True # Add the default locales [ #en_us.UTF-8 UTF-8 ]
+locale_LANG: en_US.UTF-8 # default is "en_US.UTF-8"
+#locale_KEYMAP: NULL # default is NULL
+hostname: sanArch # Hostname for the machine # Default: ArchLinux
+bootloader: grub
+esp: /efi
+detect-other-os: True
+
+users:
+  - name: san # Unprevilaged user
+    create-home: True # Weather to create the the home directory # Default True
+    groups: [wheel, audio, video, storage] # List of groups for the user
+
+packages:
+  - polkit
+  - networkmanager
+  - network-manager-applet
+  - dialog
+  - wpa_supplicant
+  - mtools
+  - dosfstools
+  - reflector
+  - base-devel
+  - xdg-user-dirs
+  - xdg-utils
+  - pipewire
+  - pipewire-pulse
+  - openssh
+  - bluez
+  - bluez-utils
+
+enable-services:
+  - NetworkManager.service
+  - bluetooth.service
+
+after-scripts: # list of paths to run scripts
+  /tmp/scripts/install

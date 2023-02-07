@@ -1,1 +1,5 @@
-__pycache__
+build/
+venv/
+*.egg-info/
+__pycache__/
+*.pyc
