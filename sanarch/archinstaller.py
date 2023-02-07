@@ -134,13 +134,12 @@ class ArchInstaller:
         linuxcmd.packstrap(packages)
         self.logger.info("Installed Base Packages")
 
-    def showMenu(self):
-        m = menu.Menu(blockdevs_info=self.bdevs)
-        m.display()
-
     def generate_fstab(self):
         # Inform os about partition table updates
-        Command('partprobe')()
+        try:
+            Command('partprobe')()
+        except Exception as e:
+            self.logger.warning(f"partprobe unable to inform os about partition table updates\nError => {e}")
 
         path = Path(self.FSTAB_PATH)
         if path.exists():
