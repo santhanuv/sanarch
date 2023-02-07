@@ -231,11 +231,11 @@ class Config:
 
     def load(self, config_file):
         # directory containing the this file
-        dir = Path(__file__).resolve().parent
-        root = dir.parts[-1]
-        while root != "archsan":
-            dir = dir.parent
-            root = dir.parts[-1]
+        # dir = Path(__file__).resolve().parent
+        # root = dir.parts[-1]
+        # while root != "archsan":
+        #     dir = dir.parent
+        #     root = dir.parts[-1]
         
         # file_path = dir / 'profiles/default.yaml'
         
