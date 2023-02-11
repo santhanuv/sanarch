@@ -18,7 +18,7 @@ import json
 
 
 class ArchInstaller:
-    LOG_DIR = '/tmp/archsan'
+    LOG_DIR = '/tmp/sanarch'
     LOG_FILENAME = 'arch-install.log'
     MAJOR_LOOP: int = 7
     MAJOR_ROM: int = 11
@@ -341,7 +341,7 @@ class ArchInstaller:
         self.logger.info("Enabled system services")
 
     def run_after_scripts(self):
-        TEMP_DIR = "/mnt/temp/archsan/scripts/"
+        TEMP_DIR = "/mnt/temp/sanarch/scripts/"
         dest = Path(TEMP_DIR)
         dest.mkdir(parents=True, exist_ok=True)
 
@@ -365,8 +365,8 @@ class ArchInstaller:
 
     def update_context(self, curr_install_state):
         context = {"install_state": curr_install_state}
-        Path("/tmp/archsan").mkdir(parents=True, exist_ok=True)
-        with open("/tmp/archsan/context.json", "w") as context_file:
+        Path("/tmp/sanarch").mkdir(parents=True, exist_ok=True)
+        with open("/tmp/sanarch/context.json", "w") as context_file:
             json.dump(context, context_file)
 
     def install(self, install_state = 0):

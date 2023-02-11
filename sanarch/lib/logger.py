@@ -78,8 +78,8 @@ class Logger(logging.getLoggerClass()):
         try:
             path.mkdir(parents=True, exist_ok=True)
         except:
-            print(f'Unable to create directory: {dir}\nDefault to ~/tmp/archsan/{filename}')
-            path = Path.home() / 'tmp/archsan'
+            print(f'Unable to create directory: {dir}\nDefault to ~/tmp/sanarch/{filename}')
+            path = Path.home() / 'tmp/sanarch'
             path.mkdir(parents=True, exist_ok=True)
         
         self.log_file = path / filename

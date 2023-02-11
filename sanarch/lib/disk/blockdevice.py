@@ -12,7 +12,7 @@ import sys
 
 @dataclass
 class BlockDevice():
-    PART_TABLE_BACKUP_DIR: ClassVar[str] = '/tmp/archsan/'
+    PART_TABLE_BACKUP_DIR: ClassVar[str] = '/tmp/sanarch/'
     PART_KEYS_SHOW: ClassVar[list[str]] = ["name", "path", "size", "label"]
     PART_KEYS_SHOW_FULL: ClassVar[list[str]] = PART_KEYS_SHOW + ["fs", "mountpoint"]
 
