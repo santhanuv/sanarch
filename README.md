@@ -44,7 +44,7 @@ Example Configuration files are in profiles directory.
 Custom scripts can be used to setup the system after installation of the base system. Any scripting language can be used for this purpose. 
 To use your custom scripts:
 1. In the config file use `after-scripts` key to add a list of scripts to run.
-2. Each item in the `after-scripts`list should contain the following keys:
+2. Each item in the `after-scripts` list should contain the following keys:
   * `prog`: The program that is used to run the script. eg: bash, python
   * `path`: Path to the script.
   * `args`: Arguments that should be given to the script. 
