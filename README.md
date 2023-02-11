@@ -48,3 +48,7 @@ To use your custom scripts:
   * `prog`: The program that is used to run the script. eg: bash, python
   * `path`: Path to the script.
   * `args`: Arguments that should be given to the script. 
+  
+## Logging
+
+Logging information can be found in the /tmp/sanarch/arch-install.log. This can be used to debug the errors during the installation.
