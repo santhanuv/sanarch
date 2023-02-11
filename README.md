@@ -7,3 +7,12 @@ Sanarch is a simple script written in python to install arch linux from a config
 * Further setup the system after the installation using a custom script.
 * Custom script can be written in any scripting language.
 * Script can be resumed after correcting any errors during the installation.
+
+## How to use the script
+
+Run the script using the command:
+```
+git clone https://github.com/santhanuv/sanarch.git
+cd sanarch
+python -m sanarch _root-password_ "username:_user-password_" _path-to-config-file_
+```
