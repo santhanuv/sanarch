@@ -17,9 +17,10 @@ Sanarch is a simple script written in python to install arch linux from a config
 git clone https://github.com/santhanuv/sanarch.git
 cd sanarch
 python -m sanarch _path-to-config-file_ _root-password_ "_username_:_user-password_"
-```
+
 Example:
   `python -m sanarch profiles/default.yaml "user123" "archuser:user123"`
+```
 
 Example Configuration files are in profiles directory.
 
