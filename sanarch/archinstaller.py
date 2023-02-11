@@ -350,10 +350,7 @@ class ArchInstaller:
             name = script["prog"]
             path:str = script["path"]
 
-            if path[0] != "/":
-                src = Path(__file__).parent.resolve() / f"{path}"
-            else:
-                src = Path(path)
+            src = Path(path)
             
             shutil.copy(src, dest)
             script_name = path.split("/")[-1]
