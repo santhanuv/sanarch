@@ -11,9 +11,9 @@ Sanarch is a simple script written in python to install arch linux from a config
 
 ## How to use the script
 
-Command:
+### Command:
 `python -m sanarch` when inside the root directory or `sanarch` when in virtual enviroment can be used to invoke the script.
-Arguments:
+### Arguments:
 `_path-to-config-file_` : Path to the config file used. (Required)
 `_root-password_` : Password for the root user. (Required)
 `_username_:_user-password_` : Username and the password for that user. (Required)
