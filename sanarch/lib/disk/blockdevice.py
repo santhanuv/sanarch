@@ -1,7 +1,6 @@
 from sanarch.lib.config import Config
 from sanarch.lib.disk.partition import Partition
 from sanarch.lib.exceptions import CommandError
-#from sanarch.lib.menu.menu import MenuItem
 from sanarch.lib.linuxcmd import lsblk_json, wipefs, get_avail_space, sgdisk
 from sanarch.lib.logger import Logger
 import json

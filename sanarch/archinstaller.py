@@ -9,7 +9,6 @@ from sanarch.lib.general import BootMode
 from sanarch.lib.command import Command
 from sanarch.lib import exceptions
 from sanarch.lib.logger import Logger
-#from sanarch.lib.menu import menu
 from sanarch.lib import linuxcmd
 import os
 from sanarch.lib.config import Config
