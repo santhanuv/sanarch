@@ -14,24 +14,26 @@ Sanarch is a simple script written in python to install arch linux from a config
 ### Command:
 `python -m sanarch` when inside the root directory of the project or `sanarch` when in virtual enviroment can be used to invoke the script.
 ### Arguments:
-`_path-to-config-file_` : Path to the config file used. (Required)
-`_root-password_` : Password for the root user. (Required)
-`_username_:_user-password_` : Username and the password for that user. (Required)
-`--resume` : Retry installation from the last error. (Optional)
-
-
+#### Required Arguments:
+`path-to-config-file` : Path to the config file used.<br/>
+`root-password` : Password for the root user.<br/>
+`username_:user-password` : Username and the password for that user.<br/>
+#### Optional Arguments:
+`--resume` : Retry installation from the last error.<br/>
+#### To Run the script:
 1. Boot the live environment.
 2. Run the script using the command:
 ```
 git clone https://github.com/santhanuv/sanarch.git
 cd sanarch
-python -m sanarch _path-to-config-file_ _root-password_ "_username_:_user-password_"
-
-Example:
-`python -m sanarch profiles/default.yaml "user123" "archuser:user123"`
+python -m sanarch path-to-config-file "root-password" "username:user-password"
+```
+#### Example:
+```
+python -m sanarch profiles/default.yaml "user123" "archuser:user123"
 ```
 
-Example Configuration files are in profiles directory.
+**Example Configuration files are in profiles directory.**
 
 ## Modify or use the script in live environment with python virtual environment
 
@@ -44,7 +46,7 @@ Example Configuration files are in profiles directory.
 5. Install the package
   `python -m pip install -e .`
 7. Run the script directly using sanarch command. 
-  `sanarch _path-to-config-file_ _root-password_ "_username_:_user-password_"`
+  `sanarch path-to-config-file "root-password" "username:user-password"`
 8. To deactivate the virtual enviroment run:
   `deactivate`
 
