@@ -11,10 +11,28 @@ Sanarch is a simple script written in python to install arch linux from a config
 
 ## How to use the script
 
-Run the script using the command:
+1. Boot the live environment.
+2. Run the script using the command:
 ```
 git clone https://github.com/santhanuv/sanarch.git
 cd sanarch
-python -m sanarch _path-to-config-file_ _root-password_ "username:_user-password_"
+python -m sanarch _path-to-config-file_ _root-password_ "_username_:_user-password_"
 ```
 Example:
+  `python -m sanarch profiles/default.yaml "user123" "archuser:user123"`
+
+Example Configuration files are in profiles directory.
+
+## Modify or use the script in live environment with python virtual environment
+1. Boot the live environment
+2. Clone the repo and change into the directory
+3. Create virtual environment
+  `python -m venv venv`
+4. Activate the virtual environment
+  `source venv/bin/activate`
+5. Install the package
+  `python -m pip install -e .`
+7. Run the script directly using sanarch command. 
+  `sanarch _path-to-config-file_ _root-password_ "_username_:_user-password_"`
+8. To deactivate the virtual enviroment run:
+  `deactivate`
