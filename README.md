@@ -19,12 +19,13 @@ cd sanarch
 python -m sanarch _path-to-config-file_ _root-password_ "_username_:_user-password_"
 
 Example:
-  `python -m sanarch profiles/default.yaml "user123" "archuser:user123"`
+`python -m sanarch profiles/default.yaml "user123" "archuser:user123"`
 ```
 
 Example Configuration files are in profiles directory.
 
 ## Modify or use the script in live environment with python virtual environment
+
 1. Boot the live environment
 2. Clone the repo and change into the directory
 3. Create virtual environment
@@ -37,3 +38,13 @@ Example Configuration files are in profiles directory.
   `sanarch _path-to-config-file_ _root-password_ "_username_:_user-password_"`
 8. To deactivate the virtual enviroment run:
   `deactivate`
+
+## Use Custom Scripts
+
+Custom scripts can be used to setup the system after installation of the base system. Any scripting language can be used for this purpose. 
+To use your custom scripts:
+1. In the config file use `after-scripts` key to add a list of scripts to run.
+2. Each item in the `after-scripts`list should contain the following keys:
+  * `prog`: The program that is used to run the script. eg: bash, python
+  * `path`: Path to the script.
+  * `args`: Arguments that should be given to the script. 
