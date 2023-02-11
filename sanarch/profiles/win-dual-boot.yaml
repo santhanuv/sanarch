@@ -67,7 +67,7 @@ esp: /efi
 detect-other-os: True
 
 users:
-  - name: san # Unprevilaged user
+  - name: archuser # Unprevilaged user
     create-home: True # Weather to create the the home directory # Default True
     groups: [wheel, audio, video, storage] # List of groups for the user
 
